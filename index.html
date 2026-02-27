@@ -21,9 +21,7 @@
         .btn-sync { background: #1976d2; color: white; border-bottom: 4px solid #1565c0; }
         .btn-new-quote { background: #607d8b; color: white; border-bottom: 4px solid #455a64; }
         .btn-add { background: #d32f2f; color: white; font-size: 18px; margin-top: 20px; border-bottom: 4px solid #b71c1c; }
-        .btn-update { background: #2e7d32; color: white; font-size: 18px; margin-top: 20px; border-bottom: 4px solid #1b5e20; display: none; }
-        .btn-pdf { background: #546e7a; color: white; }
-        .btn-record { background: #ff9800; color: white; border-bottom: 4px solid #e68a00; }
+        .btn-update-active { background: #2e7d32 !important; color: white !important; border-bottom: 4px solid #1b5e20 !important; }
         
         .btn-remove { background: #c62828; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-edit { background: #1976d2; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; }
@@ -53,10 +51,9 @@
     <div id="sync-status">Status: Ready</div>
 
     <span class="section-label">1. Customer Info</span>
-    <label>Customer Name</label>
-    <input type="text" id="custName" placeholder="Enter Name">
+    <input type="text" id="custName" placeholder="Customer Name">
 
-    <span class="section-label">2. Add Item to Order</span>
+    <span class="section-label">2. Item Entry</span>
     <div class="grid">
         <div>
             <label>Process</label>
@@ -75,44 +72,45 @@
         </div>
     </div>
     <div class="grid">
-        <div><label>Item Selection</label><select id="itemSelect"><option value="">-- Sync First --</option></select></div>
-        <div><label>Apply Setup Fee?</label><select id="applySetup"><option value="no">No</option><option value="yes">Yes</option></select></div>
+        <div><label>Item</label><select id="itemSelect"><option value="">-- Sync First --</option></select></div>
+        <div><label>Setup Fee?</label><select id="applySetup"><option value="no">No</option><option value="yes">Yes</option></select></div>
     </div>
-    <label>Item Specific Notes</label>
-    <textarea id="jobNotes" placeholder="Size, Color, Details..." style="height:60px;"></textarea>
-    <div id="laserTimeContainer" style="display:none; background: #bbdefb; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #90caf9;">
-        <label>Laser Machine Time (Minutes)</label>
+    <label>Job Notes</label>
+    <textarea id="jobNotes" placeholder="Details..." style="height:60px;"></textarea>
+    <div id="laserTimeContainer" style="display:none; background: #bbdefb; padding: 15px; border-radius: 8px; margin-top: 10px;">
+        <label>Laser Time (Mins)</label>
         <input type="number" id="laserMins" value="10">
     </div>
-    <div class="grid" style="margin-top:15px;">
+    <div class="grid" style="margin-top:10px;">
         <div><label>Quantity</label><input type="number" id="qty" value="1"></div>
         <div><label>Sourcing</label><select id="provided"><option value="no">Shop Provides</option><option value="yes">Customer Provides</option></select></div>
     </div>
     
-    <button class="btn-add" id="btnAdd" onclick="addItemToQuote()">➕ Add Item to Quote</button>
-    <button class="btn-update" id="btnUpdate" onclick="finishUpdate()">✅ Update Item</button>
+    <button class="btn-add" id="mainActionButton" onclick="handleMainAction()">➕ Add Item to Quote</button>
 
-    <span class="section-label">3. Live Quote Summary</span>
+    <span class="section-label">3. Summary</span>
     <div id="resultBox" style="display:none;">
         <div id="pdf-content">
             <h2 style="color:#d32f2f; margin:0; text-align: center;">Quote for: <span id="outName"></span></h2>
             <p style="text-align:center; font-size: 0.8em; margin: 5px 0;">Date: <span id="quoteDate"></span></p>
             <table id="quoteTable">
-                <thead><tr><th>Item & Notes</th><th>Qty</th><th>Total</th><th class="no-print">Actions</th></tr></thead>
+                <thead><tr><th>Details</th><th>Qty</th><th>Total</th><th class="no-print">Edit/X</th></tr></thead>
                 <tbody id="quoteBody"></tbody>
             </table>
             <div class="grand-total-box">
                 <div id="final-discount-line" style="color: #d32f2f; font-size: 0.4em; font-weight:bold;"></div>
                 <div id="tax-line" style="font-size: 0.4em; color: #455a64;"></div>
-                <strong>Grand Total: $<span id="grandTotal">0.00</span></strong>
+                <strong>Total: $<span id="grandTotal">0.00</span></strong>
             </div>
         </div>
         <div class="adj-box">
-            <div class="adj-group"><strong>Discount:</strong> <input type="number" id="manualDiscount" class="adj-input" value="0" oninput="renderQuote()"> %</div>
-            <div class="adj-group"><input type="checkbox" id="applyTax" class="tax-checkbox" onchange="renderQuote()"><strong>Tax:</strong> <input type="number" id="taxOverride" class="adj-input" value="7.5" step="0.1" oninput="renderQuote()"> %</div>
+            <div class="adj-group"><strong>Disc %</strong> <input type="number" id="manualDiscount" class="adj-input" value="0" oninput="renderQuote()"></div>
+            <div class="adj-group"><input type="checkbox" id="applyTax" class="tax-checkbox" onchange="renderQuote()"><strong>Tax %</strong> <input type="number" id="taxOverride" class="adj-input" value="7.5" step="0.1" oninput="renderQuote()"></div>
         </div>
-        <button class="btn-pdf" onclick="savePDF()">Download PDF</button>
-        <button class="btn-record" onclick="recordQuote()">💾 Record Order to Spreadsheet</button>
+        <div class="grid">
+            <button class="btn-pdf" onclick="savePDF()">Download PDF</button>
+            <button class="btn-record" onclick="recordQuote()">💾 Record Order</button>
+        </div>
     </div>
 </div>
 
@@ -124,7 +122,7 @@ const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94Bx
 const proxy = "https://corsproxy.io/?";
 
 async function fetchAllData() {
-    document.getElementById('sync-status').innerText = "⌛ Syncing Catalog & Rates...";
+    document.getElementById('sync-status').innerText = "⌛ Syncing...";
     try {
         const catRes = await fetch(proxy + encodeURIComponent(catalogUrl));
         const catData = await catRes.text();
@@ -135,7 +133,7 @@ async function fetchAllData() {
         if (shopRates.Tax_Rate) document.getElementById('taxOverride').value = (shopRates.Tax_Rate * 100).toFixed(1);
         const select = document.getElementById('itemSelect'); select.innerHTML = "";
         catalogData.forEach((item, i) => { const opt = document.createElement('option'); opt.value = i; opt.text = `${item.name} ($${item.price.toFixed(2)})`; select.add(opt); });
-        document.getElementById('sync-status').innerText = "✅ Full Shop Sync Complete";
+        document.getElementById('sync-status').innerText = "✅ Ready";
     } catch (e) { document.getElementById('sync-status').innerText = "❌ Sync Error"; }
 }
 
@@ -163,36 +161,29 @@ function calculateCost() {
     return total;
 }
 
+function handleMainAction() {
+    if (editingIndex === -1) addItemToQuote();
+    else finishUpdate();
+}
+
 function addItemToQuote() {
     if (document.getElementById('itemSelect').value === "") return alert("Sync first!");
     const desc = `${catalogData[document.getElementById('itemSelect').value].name} [${document.getElementById('type').value.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`;
     quoteItems.push({ 
-        desc: desc, 
-        qty: document.getElementById('qty').value, 
-        total: calculateCost(),
+        desc: desc, qty: document.getElementById('qty').value, total: calculateCost(),
         raw: {
-            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, module: document.getElementById('laserModule').value, setup: document.getElementById('applySetup').value,
-            notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
+            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, module: document.getElementById('laserModule').value, 
+            setup: document.getElementById('applySetup').value, notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
+            qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
         }
     });
     renderQuote(); resetEntry();
 }
 
-function startNewQuote() {
-    if (confirm("Clear ALL data and start a new quote?")) {
-        quoteItems = [];
-        document.getElementById('custName').value = "";
-        document.getElementById('manualDiscount').value = "0";
-        document.getElementById('applyTax').checked = false;
-        resetEntry();
-        fetchAllData(); // Auto-sync to get fresh prices/tax
-        renderQuote();
-    }
-}
-
 function editItem(index) {
     const itm = quoteItems[index].raw;
     editingIndex = index;
+    // Load data back into fields
     document.getElementById('itemSelect').value = itm.itemIdx;
     document.getElementById('type').value = itm.type;
     document.getElementById('laserModule').value = itm.module;
@@ -202,8 +193,11 @@ function editItem(index) {
     document.getElementById('qty').value = itm.qty;
     document.getElementById('provided').value = itm.provided;
     handleProcessChange();
-    document.getElementById('btnAdd').style.display = 'none';
-    document.getElementById('btnUpdate').style.display = 'block';
+    
+    // Change Button Style to "Update"
+    const btn = document.getElementById('mainActionButton');
+    btn.innerHTML = "✅ Update Item in Quote";
+    btn.classList.add('btn-update-active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -213,14 +207,23 @@ function finishUpdate() {
         qty: document.getElementById('qty').value,
         total: calculateCost(),
         raw: {
-            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, module: document.getElementById('laserModule').value, setup: document.getElementById('applySetup').value,
-            notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
+            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, module: document.getElementById('laserModule').value, 
+            setup: document.getElementById('applySetup').value, notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
+            qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
         }
     };
     editingIndex = -1;
-    document.getElementById('btnAdd').style.display = 'block';
-    document.getElementById('btnUpdate').style.display = 'none';
+    const btn = document.getElementById('mainActionButton');
+    btn.innerHTML = "➕ Add Item to Quote";
+    btn.classList.remove('btn-update-active');
     renderQuote(); resetEntry();
+}
+
+function startNewQuote() {
+    if (confirm("Clear all data for a new customer?")) {
+        quoteItems = []; document.getElementById('custName').value = ""; document.getElementById('manualDiscount').value = "0";
+        document.getElementById('applyTax').checked = false; resetEntry(); fetchAllData(); renderQuote();
+    }
 }
 
 function renderQuote() {
