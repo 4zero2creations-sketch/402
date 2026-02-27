@@ -240,14 +240,20 @@ function resetEntry() { document.getElementById('jobNotes').value = ""; document
 function removeItem(index) { quoteItems.splice(index, 1); renderQuote(); }
 
 function recordQuote() {
-    const name = encodeURIComponent(document.getElementById('custName').value);
-    const taxVal = document.getElementById('taxOverride').value;
-    const taxStatus = document.getElementById('applyTax').checked ? `[Tax ${taxVal}%]` : "[Tax Exempt]";
-    let summary = quoteItems.map(i => `${i.qty}x ${i.desc}`).join(" | ") + " " + taxStatus;
-    const total = encodeURIComponent(document.getElementById('grandTotal').innerText);
-    
-    // We force a clean URL without any extra session data
-    const finalUrl = `${formUrl}?usp=pp_url&entry.1592314545=${name}&entry.1989487532=${encodeURIComponent(summary)}&entry.101375962=Multiple&entry.1075677943=${total}`;
+    const nameVal = document.getElementById('custName').value || "Walk-in";
+    const itemVal = quoteItems.map(i => `${i.desc}`).join(" | ");
+    const qtyVal = quoteItems.map(i => i.qty).join(", ");
+    const totalVal = document.getElementById('grandTotal').innerText;
+
+    // IDs verified for Name, Item, Quantity, Total sequence
+    const ids = {
+        name: "entry.1592314545",
+        item: "entry.1989487532",
+        qty: "entry.101375962",  
+        total: "entry.1075677943" 
+    };
+
+    const finalUrl = `${formUrl}?usp=pp_url&${ids.name}=${encodeURIComponent(nameVal)}&${ids.item}=${encodeURIComponent(itemVal)}&${ids.qty}=${encodeURIComponent(qtyVal)}&${ids.total}=${encodeURIComponent(totalVal)}`;
     
     window.open(finalUrl, '_blank');
 }
