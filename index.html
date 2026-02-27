@@ -30,7 +30,6 @@
         td { padding: 12px; border-bottom: 1px solid #ccc; word-wrap: break-word; }
         .grand-total-box { font-size: 2em; background: #fff9c4; padding: 20px; border: 3px solid #fbc02d; text-align: center; border-radius: 12px; margin-top: 20px; }
         .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        #sync-status { font-size: 12px; text-align: center; margin-top: 8px; font-weight: bold; }
         
         #custInfoSummary { display: none; margin-bottom: 20px; line-height: 1.4; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
         #printTerms { display: none; margin-top: 30px; font-size: 10px; color: #555; border-top: 1px solid #ccc; padding-top: 10px; }
@@ -61,7 +60,7 @@
             <button class="btn-sync" onclick="fetchAllData()">🔄 Sync Shop Data</button>
             <button class="btn-new-quote" onclick="startNewQuote()">✨ New Quote</button>
         </div>
-        <div id="sync-status">Status: Ready</div>
+        <div id="sync-status" style="text-align:center; font-size:12px; margin-top:8px; font-weight:bold;">Status: Ready</div>
 
         <span class="section-label">1. Customer Details</span>
         <div class="grid">
@@ -90,7 +89,7 @@
             </div>
         </div>
         <div class="grid">
-            <div><label>Item</label><select id="itemSelect"><option value="">-- Sync First --</option></select></div>
+            <div><label>Item Selection</label><select id="itemSelect"><option value="">-- Sync First --</option></select></div>
             <div><label>Setup Fee?</label><select id="applySetup"><option value="no">No</option><option value="yes">Yes</option></select></div>
         </div>
         <label>Job Notes</label>
@@ -184,15 +183,16 @@ function calculateCost() {
     const item = catalogData[itemIdx], qty = parseInt(document.getElementById('qty').value);
     const type = document.getElementById('type').value, module = document.getElementById('laserModule').value;
     const setupUsed = document.getElementById('applySetup').value === 'yes';
-    const watts = (module === '40w') ? shopRates.Diode_Watts : shopRates.IR_Watts;
     const lRate = (module === '40w') ? shopRates.Diode_Rate : shopRates.IR_Rate;
     let baseCost = (document.getElementById('provided').value === 'no') ? item.price : 1.50;
     const laborMin = shopRates.Labor_Rate / 60;
+    
     if (type === 'dtf' || type === 'hybrid') baseCost += (6 * laborMin);
     if (type === 'laser' || type === 'hybrid') {
         const lm = parseFloat(document.getElementById('laserMins').value);
         baseCost += (lm * (lRate + laborMin));
     }
+    
     let total = (baseCost * shopRates.Markup) * qty;
     if (setupUsed) total += shopRates.Setup_Fee;
     return total;
@@ -267,7 +267,6 @@ function renderQuote() {
     document.getElementById('final-discount-line').innerText = disc > 0 ? `Discount (${disc}%): -$${discAmt.toFixed(2)}` : "";
     document.getElementById('tax-line').innerText = taxAmt > 0 ? `Tax (${(tRate*100).toFixed(1)}%): +$${taxAmt.toFixed(2)}` : "";
     document.getElementById('grandTotal').innerText = (sub + taxAmt).toFixed(2);
-    document.getElementById('outName').innerText = document.getElementById('custName').value || "Customer";
     document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
 }
 
