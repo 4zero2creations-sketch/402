@@ -246,9 +246,15 @@ function recordQuote() {
     let summary = quoteItems.map(i => `${i.qty}x ${i.desc}`).join(" | ") + " " + taxStatus;
     const total = encodeURIComponent(document.getElementById('grandTotal').innerText);
     
-    // We stick to the basic URL parameters that worked in the Pre-fill test
-    const finalUrl = `${formUrl}?usp=pp_url&entry.1592314545=${name}&entry.1989487532=${encodeURIComponent(summary)}&entry.101375962=Multiple&entry.1075677943=${total}`;
-    
+    // Final universal URL formatting for the recording
+    const params = [
+        `entry.1592314545=${name}`,
+        `entry.1989487532=${encodeURIComponent(summary)}`,
+        `entry.101375962=Multiple`,
+        `entry.1075677943=${total}`
+    ].join('&');
+
+    const finalUrl = `${formUrl}?usp=pp_url&${params}`;
     window.open(finalUrl, '_blank');
 }
 
