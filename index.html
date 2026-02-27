@@ -86,7 +86,7 @@
 
     <span class="section-label">3. Summary</span>
     <div id="resultBox" style="display:none;">
-        <div id="pdf-content">
+        <div id="pdf-content" style="padding: 20px; background: white; border-radius: 10px;">
             <h2 style="color:#d32f2f; margin:0; text-align: center;">Quote for: <span id="outName"></span></h2>
             <p style="text-align:center; font-size: 0.8em; margin: 5px 0;">Date: <span id="quoteDate"></span></p>
             <table id="quoteTable">
@@ -177,7 +177,7 @@ function handleMainAction() {
 
 function addItemToQuote() {
     if (document.getElementById('itemSelect').value === "") return alert("Sync first!");
-    const typeVal = document.getElementById('type').value; // Corrected Logic
+    const typeVal = document.getElementById('type').value;
     const desc = `${catalogData[document.getElementById('itemSelect').value].name} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`;
     quoteItems.push({ 
         desc: desc, qty: document.getElementById('qty').value, total: calculateCost(),
@@ -209,7 +209,7 @@ function editItem(index) {
 }
 
 function finishUpdate() {
-    const typeVal = document.getElementById('type').value; // Corrected Logic
+    const typeVal = document.getElementById('type').value;
     quoteItems[editingIndex] = {
         desc: `${catalogData[document.getElementById('itemSelect').value].name} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`,
         qty: document.getElementById('qty').value,
@@ -270,15 +270,27 @@ function recordQuote() {
     };
 
     const finalUrl = `${formUrl}?usp=pp_url&${ids.name}=${encodeURIComponent(nameVal)}&${ids.item}=${encodeURIComponent(itemVal)}&${ids.qty}=${encodeURIComponent(qtyVal)}&${ids.total}=${encodeURIComponent(totalVal)}`;
-    
     window.open(finalUrl, '_blank');
 }
 
 function savePDF() {
-    const elements = document.getElementsByClassName('no-print');
-    for (let el of elements) el.style.display = 'none';
-    html2pdf().from(document.getElementById('pdf-content')).save('402_Quote.pdf').then(() => { 
-        for (let el of elements) el.style.display = 'table-cell'; 
+    const element = document.getElementById('pdf-content');
+    const elementsToHide = document.querySelectorAll('.no-print');
+    
+    // Hide controls before capture
+    elementsToHide.forEach(el => el.style.display = 'none');
+
+    const opt = {
+        margin:       0.5,
+        filename:     `402_Quote_${document.getElementById('custName').value || 'Customer'}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    // Use promise to ensure visibility restoration after capture
+    html2pdf().set(opt).from(element).save().then(() => {
+        elementsToHide.forEach(el => el.style.display = '');
     });
 }
 window.onload = fetchAllData;
