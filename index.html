@@ -51,16 +51,14 @@
 
     <span class="section-label">2. Item Entry</span>
     <div class="grid">
-        <div>
-            <label>Process</label>
+        <div><label>Process</label>
             <select id="type" onchange="handleProcessChange()">
                 <option value="dtf">Heat Press / DTF</option>
                 <option value="laser">Laser Only</option>
                 <option value="hybrid">DTF + Laser Hybrid</option>
             </select>
         </div>
-        <div>
-            <label>Laser Module</label>
+        <div><label>Laser Module</label>
             <select id="laserModule">
                 <option value="40w">40W Diode (S1)</option>
                 <option value="2w">2W IR (S1)</option>
@@ -74,8 +72,7 @@
     <label>Job Notes</label>
     <textarea id="jobNotes" placeholder="Details (Size, Color, etc.)" style="height:60px;"></textarea>
     <div id="laserTimeContainer" style="display:none; background: #bbdefb; padding: 15px; border-radius: 8px; margin-top: 10px;">
-        <label>Laser Time (Mins)</label>
-        <input type="number" id="laserMins" value="10">
+        <label>Laser Time (Mins)</label><input type="number" id="laserMins" value="10">
     </div>
     <div class="grid" style="margin-top:10px;">
         <div><label>Quantity</label><input type="number" id="qty" value="1"></div>
@@ -86,7 +83,7 @@
 
     <span class="section-label">3. Summary</span>
     <div id="resultBox" style="display:none;">
-        <div id="pdf-content" style="padding: 20px; background: white; border-radius: 10px;">
+        <div id="pdf-content">
             <h2 style="color:#d32f2f; margin:0; text-align: center;">Quote for: <span id="outName"></span></h2>
             <p style="text-align:center; font-size: 0.8em; margin: 5px 0;">Date: <span id="quoteDate"></span></p>
             <table id="quoteTable">
@@ -123,22 +120,17 @@ async function fetchAllData() {
         const catRes = await fetch(proxy + encodeURIComponent(catalogUrl));
         const catData = await catRes.text();
         catalogData = catData.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { 
-            const c = r.split(','); 
-            return { name: c[0].replace(/"/g, ""), price: parseFloat(c[1]) || 0 }; 
+            const c = r.split(','); return { name: c[0].replace(/"/g, ""), price: parseFloat(c[1]) || 0 }; 
         });
         const setRes = await fetch(proxy + encodeURIComponent(settingsUrl));
         const setData = await setRes.text();
         setData.split('\n').filter(r => r.trim() !== '').forEach(r => { 
-            const c = r.split(','); 
-            shopRates[c[0].trim()] = parseFloat(c[1]); 
+            const c = r.split(','); shopRates[c[0].trim()] = parseFloat(c[1]); 
         });
         if (shopRates.Tax_Rate) document.getElementById('taxOverride').value = (shopRates.Tax_Rate * 100).toFixed(1);
-        const select = document.getElementById('itemSelect'); 
-        select.innerHTML = "";
+        const select = document.getElementById('itemSelect'); select.innerHTML = "";
         catalogData.forEach((item, i) => { 
-            const opt = document.createElement('option'); 
-            opt.value = i; opt.text = `${item.name} ($${item.price.toFixed(2)})`; 
-            select.add(opt); 
+            const opt = document.createElement('option'); opt.value = i; opt.text = `${item.name} ($${item.price.toFixed(2)})`; select.add(opt); 
         });
         document.getElementById('sync-status').innerText = "✅ Ready";
     } catch (e) { document.getElementById('sync-status').innerText = "❌ Sync Error"; }
@@ -261,37 +253,45 @@ function recordQuote() {
     const itemVal = quoteItems.map(i => i.desc).join(" | ");
     const qtyVal = quoteItems.map(i => i.qty).join(", ");
     const totalVal = document.getElementById('grandTotal').innerText;
-
-    const ids = {
-        name: "entry.41675885",
-        item: "entry.1633428776",
-        qty: "entry.892135426",
-        total: "entry.920745966"
-    };
-
+    const ids = { name: "entry.41675885", item: "entry.1633428776", qty: "entry.892135426", total: "entry.920745966" };
     const finalUrl = `${formUrl}?usp=pp_url&${ids.name}=${encodeURIComponent(nameVal)}&${ids.item}=${encodeURIComponent(itemVal)}&${ids.qty}=${encodeURIComponent(qtyVal)}&${ids.total}=${encodeURIComponent(totalVal)}`;
     window.open(finalUrl, '_blank');
 }
 
 function savePDF() {
-    const element = document.getElementById('pdf-content');
-    const elementsToHide = document.querySelectorAll('.no-print');
+    const custName = document.getElementById('custName').value || 'Customer';
+    const source = document.getElementById('pdf-content');
     
-    // Hide controls before capture
-    elementsToHide.forEach(el => el.style.display = 'none');
+    // Create a clone for the PDF that is strictly black-on-white
+    const clone = source.cloneNode(true);
+    clone.style.background = "white";
+    clone.style.color = "black";
+    clone.style.padding = "40px";
+    clone.style.width = "750px";
+    
+    // Remove the Edit/X column from the clone table
+    const headerRow = clone.querySelector('thead tr');
+    if (headerRow) headerRow.removeChild(headerRow.lastElementChild);
+    const bodyRows = clone.querySelectorAll('tbody tr');
+    bodyRows.forEach(row => row.removeChild(row.lastElementChild));
+
+    // Force a white background on the grand total box in the clone
+    const totalBox = clone.querySelector('.grand-total-box');
+    if (totalBox) {
+        totalBox.style.background = "#f9f9f9";
+        totalBox.style.border = "2px solid #333";
+    }
 
     const opt = {
-        margin:       0.5,
-        filename:     `402_Quote_${document.getElementById('custName').value || 'Customer'}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        margin: [0.5, 0.5],
+        filename: `402_Quote_${custName}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 3, letterRendering: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
 
-    // Use promise to ensure visibility restoration after capture
-    html2pdf().set(opt).from(element).save().then(() => {
-        elementsToHide.forEach(el => el.style.display = '');
-    });
+    // Run the PDF generation on the invisible clone
+    html2pdf().set(opt).from(clone).save();
 }
 window.onload = fetchAllData;
 </script>
