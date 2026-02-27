@@ -177,7 +177,8 @@ function handleMainAction() {
 
 function addItemToQuote() {
     if (document.getElementById('itemSelect').value === "") return alert("Sync first!");
-    const desc = `${catalogData[document.getElementById('itemSelect').value].name} [${document.getElementById('type').toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`;
+    const typeVal = document.getElementById('type').value; // Corrected Logic
+    const desc = `${catalogData[document.getElementById('itemSelect').value].name} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`;
     quoteItems.push({ 
         desc: desc, qty: document.getElementById('qty').value, total: calculateCost(),
         raw: {
@@ -208,8 +209,9 @@ function editItem(index) {
 }
 
 function finishUpdate() {
+    const typeVal = document.getElementById('type').value; // Corrected Logic
     quoteItems[editingIndex] = {
-        desc: `${catalogData[document.getElementById('itemSelect').value].name} [${document.getElementById('type').value.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`,
+        desc: `${catalogData[document.getElementById('itemSelect').value].name} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`,
         qty: document.getElementById('qty').value,
         total: calculateCost(),
         raw: {
@@ -260,7 +262,6 @@ function recordQuote() {
     const qtyVal = quoteItems.map(i => i.qty).join(", ");
     const totalVal = document.getElementById('grandTotal').innerText;
 
-    // VERIFIED IDs from your pre-filled link:
     const ids = {
         name: "entry.41675885",
         item: "entry.1633428776",
