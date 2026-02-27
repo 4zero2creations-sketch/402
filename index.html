@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4 Zero 2 Creations | Shop Master Pro</title>
     <style>
-        /* 1. APP VIEW STYLES */
         body { font-family: 'Segoe UI', sans-serif; background: #757575; padding: 20px; color: #333; }
         .container { max-width: 850px; margin: auto; background: #e0e0e0; padding: 35px; border-radius: 15px; box-shadow: 0 4px 25px rgba(0,0,0,0.3); border-top: 10px solid #d32f2f; }
         .logo-area { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #bdbdbd; padding-bottom: 15px; }
@@ -31,7 +30,6 @@
         .grand-total-box { font-size: 2em; background: #fff9c4; padding: 20px; border: 3px solid #fbc02d; text-align: center; border-radius: 12px; margin-top: 20px; }
         .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         #sync-status { text-align: center; font-size: 12px; margin-top: 8px; font-weight: bold; }
-        
         #custInfoSummary { display: none; margin-bottom: 20px; line-height: 1.4; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
         #printTerms { display: none; margin-top: 30px; font-size: 10px; color: #555; border-top: 1px solid #ccc; padding-top: 10px; }
 
@@ -178,48 +176,60 @@ function handleProcessChange() {
 }
 
 function updatePrintInfo() {
-    document.getElementById('printName').innerText = document.getElementById('custName').value;
-    document.getElementById('printAddr').innerText = document.getElementById('custAddr').value;
-    document.getElementById('printPhone').innerText = document.getElementById('custPhone').value;
-    document.getElementById('printEmail').innerText = document.getElementById('custEmail').value;
+    document.getElementById('printName').innerText = document.getElementById('custName').value || "";
+    document.getElementById('printAddr').innerText = document.getElementById('custAddr').value || "";
+    document.getElementById('printPhone').innerText = document.getElementById('custPhone').value || "";
+    document.getElementById('printEmail').innerText = document.getElementById('custEmail').value || "";
 }
 
 function calculateCost() {
-    const itemIdx = document.getElementById('itemSelect').value;
-    const item = catalogData[itemIdx], qty = parseInt(document.getElementById('qty').value);
+    const itemSelect = document.getElementById('itemSelect');
+    if (!itemSelect.value) return 0;
+    
+    const item = catalogData[itemSelect.value];
+    const qty = parseInt(document.getElementById('qty').value) || 1;
     const type = document.getElementById('type').value;
     const module = document.getElementById('laserModule').value;
     const setupUsed = document.getElementById('applySetup').value === 'yes';
-    const laserRunRate = (module === '40w') ? shopRates.Diode_Rate : shopRates.IR_Rate;
     
-    let materialCost = (document.getElementById('provided').value === 'no') ? (item.price * qty) : (1.50 * qty);
-    const laborMinRate = shopRates.Labor_Rate / 60;
+    const laserRunRate = (module === '40w') ? (shopRates.Diode_Rate || 0) : (shopRates.IR_Rate || 0);
+    const materialCost = (document.getElementById('provided').value === 'no') ? (item.price * qty) : (1.50 * qty);
+    const laborMinRate = (shopRates.Labor_Rate || 0) / 60;
+    
     const isLaser = (type === 'laser' || type === 'hybrid');
-    const totalMins = isLaser ? parseFloat(document.getElementById('laserMins').value) : (6 * qty);
+    const totalMins = isLaser ? (parseFloat(document.getElementById('laserMins').value) || 0) : (6 * qty);
     
     let timeBasedCost = (totalMins * laborMinRate);
     if (isLaser) timeBasedCost += (totalMins * laserRunRate);
 
     let rawSubtotal = materialCost + timeBasedCost;
-    if (setupUsed) rawSubtotal += shopRates.Setup_Fee;
+    if (setupUsed) rawSubtotal += (shopRates.Setup_Fee || 0);
 
-    return (rawSubtotal * shopRates.Markup);
+    return (rawSubtotal * (shopRates.Markup || 1));
 }
 
 function handleMainAction() {
+    if (document.getElementById('itemSelect').value === "") {
+        alert("Please select an item first!");
+        return;
+    }
     if (editingIndex === -1) addItemToQuote();
     else finishUpdate();
 }
 
 function addItemToQuote() {
-    if (document.getElementById('itemSelect').value === "") return alert("Sync first!");
     const typeVal = document.getElementById('type').value;
-    const desc = `${catalogData[document.getElementById('itemSelect').value].name} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`;
+    const itemText = catalogData[document.getElementById('itemSelect').value].name;
+    const desc = `${itemText} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`;
+    
     quoteItems.push({ 
-        desc: desc, qty: document.getElementById('qty').value, total: calculateCost(),
+        desc: desc, 
+        qty: document.getElementById('qty').value, 
+        total: calculateCost(),
         raw: {
-            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, module: document.getElementById('laserModule').value, 
-            setup: document.getElementById('applySetup').value, notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
+            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, 
+            module: document.getElementById('laserModule').value, setup: document.getElementById('applySetup').value, 
+            notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
             qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
         }
     });
@@ -246,12 +256,14 @@ function editItem(index) {
 
 function finishUpdate() {
     const typeVal = document.getElementById('type').value;
+    const itemText = catalogData[document.getElementById('itemSelect').value].name;
     quoteItems[editingIndex] = {
-        desc: `${catalogData[document.getElementById('itemSelect').value].name} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`,
+        desc: `${itemText} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`,
         qty: document.getElementById('qty').value, total: calculateCost(),
         raw: {
-            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, module: document.getElementById('laserModule').value, 
-            setup: document.getElementById('applySetup').value, notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
+            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, 
+            module: document.getElementById('laserModule').value, setup: document.getElementById('applySetup').value, 
+            notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
             qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
         }
     };
@@ -275,7 +287,6 @@ function renderQuote() {
     document.getElementById('final-discount-line').innerText = disc > 0 ? `Discount (${disc}%): -$${discAmt.toFixed(2)}` : "";
     document.getElementById('tax-line').innerText = taxAmt > 0 ? `Tax (${(tRate*100).toFixed(1)}%): +$${taxAmt.toFixed(2)}` : "";
     document.getElementById('grandTotal').innerText = (sub + taxAmt).toFixed(2);
-    document.getElementById('outName').innerText = document.getElementById('custName').value || "Customer";
     document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
 }
 
