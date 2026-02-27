@@ -160,7 +160,8 @@ async function fetchAllData() {
             const c = r.split(','); shopRates[c[0].trim()] = parseFloat(c[1]); 
         });
         if (shopRates.Tax_Rate) document.getElementById('taxOverride').value = (shopRates.Tax_Rate * 100).toFixed(1);
-        const select = document.getElementById('itemSelect'); select.innerHTML = "";
+        const select = document.getElementById('itemSelect'); 
+        select.innerHTML = '<option value="">-- Select Item --</option>';
         catalogData.forEach((item, i) => { 
             const opt = document.createElement('option'); opt.value = i; opt.text = `${item.name} ($${item.price.toFixed(2)})`; select.add(opt); 
         });
@@ -192,7 +193,7 @@ function calculateCost() {
     const setupUsed = document.getElementById('applySetup').value === 'yes';
     const markup = shopRates.Markup || 1;
     
-    // RETAIL LOGIC: Markup physical material, pass-through labor/time
+    // Marked up Material Cost, flat labor/laser time
     let materialCost = (document.getElementById('provided').value === 'no') ? (item.price * qty) : (1.50 * qty);
     let materialTotal = materialCost * markup;
     
@@ -208,7 +209,7 @@ function calculateCost() {
 }
 
 function handleMainAction() {
-    if (document.getElementById('itemSelect').value === "") return alert("Select an item!");
+    if (document.getElementById('itemSelect').value === "") return alert("Select an item first!");
     if (editingIndex === -1) addItemToQuote(); else finishUpdate();
 }
 
@@ -277,7 +278,6 @@ function renderQuote() {
     if (document.getElementById('applyTax').checked) taxAmt = sub * tRate;
     document.getElementById('quoteDate').innerText = new Date().toLocaleDateString();
     document.getElementById('grandTotal').innerText = (sub + taxAmt).toFixed(2);
-    document.getElementById('outName').innerText = document.getElementById('custName').value || "Customer";
     document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
 }
 
