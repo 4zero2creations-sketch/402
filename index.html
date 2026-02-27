@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4 Zero 2 Creations | Shop Master Pro</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
+        /* 1. APP VIEW STYLES (What you see on screen) */
         body { font-family: 'Segoe UI', sans-serif; background: #757575; padding: 20px; color: #333; }
         .container { max-width: 850px; margin: auto; background: #e0e0e0; padding: 35px; border-radius: 15px; box-shadow: 0 4px 25px rgba(0,0,0,0.3); border-top: 10px solid #d32f2f; }
         .logo-area { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #bdbdbd; padding-bottom: 15px; }
@@ -19,89 +19,106 @@
         .btn-sync { background: #1976d2; color: white; border-bottom: 4px solid #1565c0; }
         .btn-new-quote { background: #607d8b; color: white; border-bottom: 4px solid #455a64; }
         .btn-add { background: #d32f2f; color: white; font-size: 18px; margin-top: 20px; border-bottom: 4px solid #b71c1c; }
-        .btn-update-active { background: #2e7d32 !important; color: white !important; border-bottom: 4px solid #1b5e20 !important; }
+        .btn-update-active { background: #2e7d32 !important; color: white !important; }
         .btn-pdf { background: #546e7a; color: white; }
         .btn-record { background: #ff9800; color: white; border-bottom: 4px solid #e68a00; }
-        .btn-remove { background: #c62828; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-edit { background: #1976d2; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; }
+        .btn-remove, .btn-edit { padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-edit { background: #1976d2; color: white; margin-right: 5px; }
+        .btn-remove { background: #c62828; color: white; }
         table { width: 100%; margin-top: 20px; border-collapse: collapse; background: #eee; border-radius: 8px; overflow: hidden; }
-        th { background: #455a64; color: white; padding: 12px; text-align: left; font-size: 0.8em; }
-        td { padding: 12px; border-bottom: 1px solid #ccc; font-size: 0.9em; }
+        th { background: #455a64; color: white; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #ccc; }
         .grand-total-box { font-size: 2em; background: #fff9c4; padding: 20px; border: 3px solid #fbc02d; text-align: center; border-radius: 12px; margin-top: 20px; }
-        .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #b0bec5; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: center; }
-        .adj-group { display: flex; align-items: center; gap: 8px; justify-content: center; }
-        .adj-input { width: 70px !important; text-align: center; padding: 8px !important; margin: 0 !important; }
-        #sync-status { font-size: 12px; text-align: center; margin-top: 8px; color: #1b5e20; font-weight: bold; }
-        .no-print { width: 80px; text-align: center; }
+        .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        #sync-status { font-size: 12px; text-align: center; margin-top: 8px; font-weight: bold; }
+
+        /* 2. PRINT/PDF VIEW STYLES (What the PDF looks like) */
+        @media print {
+            body { background: white !important; padding: 0 !important; }
+            .container { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; background: white !important; }
+            .no-print, button, .adj-box, .section-label, .logo-area p.logo-4, #sync-status, label, input, select, textarea, .btn-add { display: none !important; }
+            #resultBox { display: block !important; }
+            table { border: 1px solid #333 !important; background: white !important; }
+            th { background: #eee !important; color: black !important; border: 1px solid #333 !important; }
+            td { border: 1px solid #333 !important; color: black !important; }
+            .grand-total-box { border: 2px solid black !important; background: white !important; color: black !important; }
+            .logo-area { border-bottom: 2px solid black !important; margin-bottom: 30px !important; }
+            .logo-text { font-size: 32px !important; color: black !important; display: block !important; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="logo-area"><p class="logo-4">4</p><p class="logo-text">4 Zero 2 Creations</p></div>
-    
-    <div class="grid">
-        <button class="btn-sync" onclick="fetchAllData()">🔄 Sync Shop Data</button>
-        <button class="btn-new-quote" onclick="startNewQuote()">✨ New Quote</button>
-    </div>
-    <div id="sync-status">Status: Ready</div>
-
-    <span class="section-label">1. Customer Info</span>
-    <input type="text" id="custName" placeholder="Customer Name">
-
-    <span class="section-label">2. Item Entry</span>
-    <div class="grid">
-        <div><label>Process</label>
-            <select id="type" onchange="handleProcessChange()">
-                <option value="dtf">Heat Press / DTF</option>
-                <option value="laser">Laser Only</option>
-                <option value="hybrid">DTF + Laser Hybrid</option>
-            </select>
-        </div>
-        <div><label>Laser Module</label>
-            <select id="laserModule">
-                <option value="40w">40W Diode (S1)</option>
-                <option value="2w">2W IR (S1)</option>
-            </select>
-        </div>
-    </div>
-    <div class="grid">
-        <div><label>Item Selection</label><select id="itemSelect"><option value="">-- Sync First --</option></select></div>
-        <div><label>Setup Fee?</label><select id="applySetup"><option value="no">No</option><option value="yes">Yes</option></select></div>
-    </div>
-    <label>Job Notes</label>
-    <textarea id="jobNotes" placeholder="Details (Size, Color, etc.)" style="height:60px;"></textarea>
-    <div id="laserTimeContainer" style="display:none; background: #bbdefb; padding: 15px; border-radius: 8px; margin-top: 10px;">
-        <label>Laser Time (Mins)</label><input type="number" id="laserMins" value="10">
-    </div>
-    <div class="grid" style="margin-top:10px;">
-        <div><label>Quantity</label><input type="number" id="qty" value="1"></div>
-        <div><label>Sourcing</label><select id="provided"><option value="no">Shop Provides</option><option value="yes">Customer Provides</option></select></div>
+    <div class="logo-area">
+        <p class="logo-4">4</p>
+        <p class="logo-text">4 Zero 2 Creations</p>
     </div>
     
-    <button class="btn-add" id="mainActionButton" onclick="handleMainAction()">➕ Add Item to Quote</button>
+    <div class="no-print">
+        <div class="grid">
+            <button class="btn-sync" onclick="fetchAllData()">🔄 Sync Shop Data</button>
+            <button class="btn-new-quote" onclick="startNewQuote()">✨ New Quote</button>
+        </div>
+        <div id="sync-status">Status: Ready</div>
 
-    <span class="section-label">3. Summary</span>
+        <span class="section-label">1. Customer Info</span>
+        <input type="text" id="custName" placeholder="Customer Name">
+
+        <span class="section-label">2. Item Entry</span>
+        <div class="grid">
+            <div><label>Process</label>
+                <select id="type" onchange="handleProcessChange()">
+                    <option value="dtf">Heat Press / DTF</option>
+                    <option value="laser">Laser Only</option>
+                    <option value="hybrid">DTF + Laser Hybrid</option>
+                </select>
+            </div>
+            <div><label>Laser Module</label>
+                <select id="laserModule">
+                    <option value="40w">40W Diode (S1)</option>
+                    <option value="2w">2W IR (S1)</option>
+                </select>
+            </div>
+        </div>
+        <div class="grid">
+            <div><label>Item</label><select id="itemSelect"><option value="">-- Sync First --</option></select></div>
+            <div><label>Setup Fee?</label><select id="applySetup"><option value="no">No</option><option value="yes">Yes</option></select></div>
+        </div>
+        <label>Job Notes</label>
+        <textarea id="jobNotes" placeholder="Details (Size, Color, etc.)" style="height:60px;"></textarea>
+        <div id="laserTimeContainer" style="display:none; background: #bbdefb; padding: 15px; border-radius: 8px; margin-top: 10px;">
+            <label>Laser Time (Mins)</label><input type="number" id="laserMins" value="10">
+        </div>
+        <div class="grid" style="margin-top:10px;">
+            <div><label>Quantity</label><input type="number" id="qty" value="1"></div>
+            <div><label>Sourcing</label><select id="provided"><option value="no">Shop Provides</option><option value="yes">Customer Provides</option></select></div>
+        </div>
+        
+        <button class="btn-add" id="mainActionButton" onclick="handleMainAction()">➕ Add Item to Quote</button>
+    </div>
+
+    <span class="section-label no-print">3. Summary</span>
     <div id="resultBox" style="display:none;">
         <div id="pdf-content">
-            <h2 style="color:#d32f2f; margin:0; text-align: center;">Quote for: <span id="outName"></span></h2>
+            <h2 style="color:#d32f2f; margin:0; text-align: center;" id="quoteTitle">Quote for: <span id="outName"></span></h2>
             <p style="text-align:center; font-size: 0.8em; margin: 5px 0;">Date: <span id="quoteDate"></span></p>
             <table id="quoteTable">
-                <thead><tr><th>Details</th><th>Qty</th><th>Total</th><th class="no-print">Edit/X</th></tr></thead>
+                <thead><tr><th>Details</th><th>Qty</th><th>Total</th><th class="no-print">X</th></tr></thead>
                 <tbody id="quoteBody"></tbody>
             </table>
             <div class="grand-total-box">
-                <div id="final-discount-line" style="color: #d32f2f; font-size: 0.4em; font-weight:bold;"></div>
-                <div id="tax-line" style="font-size: 0.4em; color: #455a64;"></div>
+                <div id="final-discount-line" style="color: #d32f2f; font-size: 0.5em;"></div>
+                <div id="tax-line" style="font-size: 0.5em; color: #455a64;"></div>
                 <strong>Total: $<span id="grandTotal">0.00</span></strong>
             </div>
         </div>
-        <div class="adj-box">
-            <div class="adj-group"><strong>Disc %</strong> <input type="number" id="manualDiscount" class="adj-input" value="0" oninput="renderQuote()"></div>
-            <div class="adj-group"><input type="checkbox" id="applyTax" class="tax-checkbox" onchange="renderQuote()"><strong>Tax %</strong> <input type="number" id="taxOverride" class="adj-input" value="7.5" step="0.1" oninput="renderQuote()"></div>
+        <div class="adj-box no-print">
+            <div><strong>Disc %</strong> <input type="number" id="manualDiscount" value="0" oninput="renderQuote()"></div>
+            <div><input type="checkbox" id="applyTax" onchange="renderQuote()"><strong>Tax %</strong> <input type="number" id="taxOverride" value="7.5" step="0.1" oninput="renderQuote()"></div>
         </div>
-        <div class="grid">
-            <button class="btn-pdf" onclick="savePDF()">Download PDF</button>
+        <div class="grid no-print">
+            <button class="btn-pdf" onclick="window.print()">🖨️ Print / Save PDF</button>
             <button class="btn-record" onclick="recordQuote()">💾 Record Order</button>
         </div>
     </div>
@@ -182,57 +199,11 @@ function addItemToQuote() {
     renderQuote(); resetEntry();
 }
 
-function editItem(index) {
-    const itm = quoteItems[index].raw;
-    editingIndex = index;
-    document.getElementById('itemSelect').value = itm.itemIdx;
-    document.getElementById('type').value = itm.type;
-    document.getElementById('laserModule').value = itm.module;
-    document.getElementById('applySetup').value = itm.setup;
-    document.getElementById('jobNotes').value = itm.notes;
-    document.getElementById('laserMins').value = itm.laserMins;
-    document.getElementById('qty').value = itm.qty;
-    document.getElementById('provided').value = itm.provided;
-    handleProcessChange();
-    const btn = document.getElementById('mainActionButton');
-    btn.innerHTML = "✅ Update Item in Quote";
-    btn.classList.add('btn-update-active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function finishUpdate() {
-    const typeVal = document.getElementById('type').value;
-    quoteItems[editingIndex] = {
-        desc: `${catalogData[document.getElementById('itemSelect').value].name} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`,
-        qty: document.getElementById('qty').value,
-        total: calculateCost(),
-        raw: {
-            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, module: document.getElementById('laserModule').value, 
-            setup: document.getElementById('applySetup').value, notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
-            qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
-        }
-    };
-    editingIndex = -1;
-    const btn = document.getElementById('mainActionButton');
-    btn.innerHTML = "➕ Add Item to Quote";
-    btn.classList.remove('btn-update-active');
-    renderQuote(); resetEntry();
-}
-
-function startNewQuote() {
-    if (confirm("Clear all data for a new customer?")) {
-        quoteItems = []; document.getElementById('custName').value = ""; 
-        document.getElementById('manualDiscount').value = "0";
-        document.getElementById('applyTax').checked = false; 
-        resetEntry(); fetchAllData(); renderQuote();
-    }
-}
-
 function renderQuote() {
     const body = document.getElementById('quoteBody'); body.innerHTML = ""; let subTotal = 0;
     quoteItems.forEach((item, index) => { 
         subTotal += item.total; 
-        body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="action-col no-print"><button class="btn-edit" onclick="editItem(${index})">✎</button><button class="btn-remove" onclick="removeItem(${index})">X</button></td></tr>`; 
+        body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print"><button class="btn-remove" onclick="removeItem(${index})">X</button></td></tr>`; 
     });
     const disc = parseFloat(document.getElementById('manualDiscount').value) || 0, discAmt = subTotal * (disc / 100), sub = subTotal - discAmt;
     let taxAmt = 0; const tRate = parseFloat(document.getElementById('taxOverride').value) / 100;
@@ -245,9 +216,6 @@ function renderQuote() {
     document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
 }
 
-function resetEntry() { document.getElementById('jobNotes').value = ""; document.getElementById('qty').value = "1"; }
-function removeItem(index) { quoteItems.splice(index, 1); renderQuote(); }
-
 function recordQuote() {
     const nameVal = document.getElementById('custName').value || "Walk-in";
     const itemVal = quoteItems.map(i => i.desc).join(" | ");
@@ -258,41 +226,9 @@ function recordQuote() {
     window.open(finalUrl, '_blank');
 }
 
-function savePDF() {
-    const custName = document.getElementById('custName').value || 'Customer';
-    const source = document.getElementById('pdf-content');
-    
-    // Create a clone for the PDF that is strictly black-on-white
-    const clone = source.cloneNode(true);
-    clone.style.background = "white";
-    clone.style.color = "black";
-    clone.style.padding = "40px";
-    clone.style.width = "750px";
-    
-    // Remove the Edit/X column from the clone table
-    const headerRow = clone.querySelector('thead tr');
-    if (headerRow) headerRow.removeChild(headerRow.lastElementChild);
-    const bodyRows = clone.querySelectorAll('tbody tr');
-    bodyRows.forEach(row => row.removeChild(row.lastElementChild));
-
-    // Force a white background on the grand total box in the clone
-    const totalBox = clone.querySelector('.grand-total-box');
-    if (totalBox) {
-        totalBox.style.background = "#f9f9f9";
-        totalBox.style.border = "2px solid #333";
-    }
-
-    const opt = {
-        margin: [0.5, 0.5],
-        filename: `402_Quote_${custName}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 3, letterRendering: true, backgroundColor: "#ffffff" },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-
-    // Run the PDF generation on the invisible clone
-    html2pdf().set(opt).from(clone).save();
-}
+function startNewQuote() { if (confirm("Clear quote?")) { quoteItems = []; document.getElementById('custName').value = ""; renderQuote(); } }
+function resetEntry() { document.getElementById('jobNotes').value = ""; document.getElementById('qty').value = "1"; }
+function removeItem(index) { quoteItems.splice(index, 1); renderQuote(); }
 window.onload = fetchAllData;
 </script>
 </body>
