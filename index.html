@@ -6,40 +6,31 @@
     <title>4 Zero 2 Creations | Shop Master Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* Eye-Saver Medium Grey Theme */
         body { font-family: 'Segoe UI', sans-serif; background: #757575; padding: 20px; color: #333; }
         .container { max-width: 850px; margin: auto; background: #e0e0e0; padding: 35px; border-radius: 15px; box-shadow: 0 4px 25px rgba(0,0,0,0.3); border-top: 10px solid #d32f2f; }
-        
         .logo-area { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #bdbdbd; padding-bottom: 15px; }
         .logo-4 { font-size: 80px; font-weight: 900; color: #d32f2f; line-height: 1; margin: 0; }
         .logo-text { font-size: 24px; text-transform: uppercase; font-weight: bold; margin: 0; color: #212121; }
-        
         .section-label { background: #455a64; color: white; padding: 10px; font-weight: bold; margin-top: 25px; border-radius: 6px; display: block; text-align: center; font-size: 0.8em; text-transform: uppercase; }
         label { font-weight: bold; display: block; margin-top: 15px; font-size: 0.85em; color: #424242; }
-        
         input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #9e9e9e; border-radius: 8px; box-sizing: border-box; font-size: 15px; background: #f5f5f5; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        
         button { width: 100%; padding: 14px; margin-top: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-sync { background: #1976d2; color: white; border-bottom: 4px solid #1565c0; }
         .btn-new-quote { background: #607d8b; color: white; border-bottom: 4px solid #455a64; }
         .btn-add { background: #d32f2f; color: white; font-size: 18px; margin-top: 20px; border-bottom: 4px solid #b71c1c; }
         .btn-update-active { background: #2e7d32 !important; color: white !important; border-bottom: 4px solid #1b5e20 !important; }
-        
         .btn-pdf { background: #546e7a; color: white; }
         .btn-record { background: #ff9800; color: white; border-bottom: 4px solid #e68a00; }
         .btn-remove { background: #c62828; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-edit { background: #1976d2; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; }
-        
         table { width: 100%; margin-top: 20px; border-collapse: collapse; background: #eee; border-radius: 8px; overflow: hidden; }
         th { background: #455a64; color: white; padding: 12px; text-align: left; font-size: 0.8em; }
         td { padding: 12px; border-bottom: 1px solid #ccc; font-size: 0.9em; }
-        
         .grand-total-box { font-size: 2em; background: #fff9c4; padding: 20px; border: 3px solid #fbc02d; text-align: center; border-radius: 12px; margin-top: 20px; }
         .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #b0bec5; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: center; }
         .adj-group { display: flex; align-items: center; gap: 8px; justify-content: center; }
         .adj-input { width: 70px !important; text-align: center; padding: 8px !important; margin: 0 !important; }
-        
         #sync-status { font-size: 12px; text-align: center; margin-top: 8px; color: #1b5e20; font-weight: bold; }
         .no-print { width: 80px; text-align: center; }
     </style>
@@ -81,7 +72,7 @@
         <div><label>Setup Fee?</label><select id="applySetup"><option value="no">No</option><option value="yes">Yes</option></select></div>
     </div>
     <label>Job Notes</label>
-    <textarea id="jobNotes" placeholder="Size, Color, Details..." style="height:60px;"></textarea>
+    <textarea id="jobNotes" placeholder="Details..." style="height:60px;"></textarea>
     <div id="laserTimeContainer" style="display:none; background: #bbdefb; padding: 15px; border-radius: 8px; margin-top: 10px;">
         <label>Laser Time (Mins)</label>
         <input type="number" id="laserMins" value="10">
@@ -123,7 +114,7 @@
 let catalogData = [], shopRates = {}, quoteItems = [], editingIndex = -1;
 const catalogUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?output=csv";
 const settingsUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?gid=1511041891&single=true&output=csv"; 
-const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94BxLsUcKHa8uN9hC6UqxjB8r6ZeBfg/viewform?usp=pp_url";
+const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94BxLsUcKHa8uN9hC6UqxjB8r6ZeBfg/viewform";
 const proxy = "https://corsproxy.io/?";
 
 async function fetchAllData() {
@@ -255,8 +246,8 @@ function recordQuote() {
     let summary = quoteItems.map(i => `${i.qty}x ${i.desc}`).join(" | ") + " " + taxStatus;
     const total = encodeURIComponent(document.getElementById('grandTotal').innerText);
     
-    // VERIFIED ENTRY IDs:
-    const finalUrl = `${formUrl}&entry.1592314545=${name}&entry.1989487532=${encodeURIComponent(summary)}&entry.101375962=Multiple&entry.1075677943=${total}`;
+    // We stick to the basic URL parameters that worked in the Pre-fill test
+    const finalUrl = `${formUrl}?usp=pp_url&entry.1592314545=${name}&entry.1989487532=${encodeURIComponent(summary)}&entry.101375962=Multiple&entry.1075677943=${total}`;
     
     window.open(finalUrl, '_blank');
 }
