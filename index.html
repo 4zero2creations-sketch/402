@@ -6,15 +6,20 @@
     <title>4 Zero 2 Creations | Shop Master Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
+        /* Eye-Saver Medium Grey Theme */
         body { font-family: 'Segoe UI', sans-serif; background: #757575; padding: 20px; color: #333; }
         .container { max-width: 850px; margin: auto; background: #e0e0e0; padding: 35px; border-radius: 15px; box-shadow: 0 4px 25px rgba(0,0,0,0.3); border-top: 10px solid #d32f2f; }
+        
         .logo-area { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #bdbdbd; padding-bottom: 15px; }
         .logo-4 { font-size: 80px; font-weight: 900; color: #d32f2f; line-height: 1; margin: 0; }
         .logo-text { font-size: 24px; text-transform: uppercase; font-weight: bold; margin: 0; color: #212121; }
+        
         .section-label { background: #455a64; color: white; padding: 10px; font-weight: bold; margin-top: 25px; border-radius: 6px; display: block; text-align: center; font-size: 0.8em; text-transform: uppercase; }
         label { font-weight: bold; display: block; margin-top: 15px; font-size: 0.85em; color: #424242; }
+        
         input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #9e9e9e; border-radius: 8px; box-sizing: border-box; font-size: 15px; background: #f5f5f5; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
         button { width: 100%; padding: 14px; margin-top: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-sync { background: #1976d2; color: white; border-bottom: 4px solid #1565c0; }
         .btn-add { background: #d32f2f; color: white; font-size: 18px; margin-top: 20px; border-bottom: 4px solid #b71c1c; }
@@ -22,13 +27,16 @@
         .btn-record { background: #ff9800; color: white; border-bottom: 4px solid #e68a00; }
         .btn-clear { background: #78909c; color: white; margin-top: 10px; font-size: 12px; padding: 8px; width: auto; float: right; }
         .btn-remove { background: #c62828; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
         table { width: 100%; margin-top: 20px; border-collapse: collapse; background: #eee; border-radius: 8px; overflow: hidden; }
         th { background: #455a64; color: white; padding: 12px; text-align: left; font-size: 0.8em; }
         td { padding: 12px; border-bottom: 1px solid #ccc; font-size: 0.9em; }
+        
         .grand-total-box { font-size: 2em; background: #fff9c4; padding: 20px; border: 3px solid #fbc02d; text-align: center; border-radius: 12px; margin-top: 20px; }
         .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #b0bec5; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: center; }
         .adj-group { display: flex; align-items: center; gap: 8px; justify-content: center; }
         .adj-input { width: 70px !important; text-align: center; padding: 8px !important; margin: 0 !important; }
+        
         #sync-status { font-size: 12px; text-align: center; margin-top: 8px; color: #1b5e20; font-weight: bold; }
         .no-print { width: 40px; text-align: center; }
     </style>
@@ -130,6 +138,7 @@ let catalogData = [];
 let shopRates = {};
 let quoteItems = [];
 
+// Source Links
 const catalogUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?output=csv";
 const settingsUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?gid=1511041891&single=true&output=csv"; 
 const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94BxLsUcKHa8uN9hC6UqxjB8r6ZeBfg/viewform?usp=pp_url";
@@ -185,18 +194,14 @@ function addItemToQuote() {
     const lRate = (module === '40w') ? shopRates.Diode_Rate : shopRates.IR_Rate;
     let baseCost = (document.getElementById('provided').value === 'no') ? item.price : 1.50;
     const powerCost = (w, m) => (w / 1000) * (m / 60) * shopRates.kWh_Rate;
-    const laborPerMin = shopRates.Labor_Rate / 60;
+    const laborMin = shopRates.Labor_Rate / 60;
 
-    // Logic Cleaned: Labor is pulled strictly from your Labor_Rate setting
     if (type === 'dtf' || type === 'hybrid') {
-        // 6 mins total occupancy for alignment/pressing
-        baseCost += (6 * laborPerMin) + powerCost(shopRates.Press_Watts, 6) + 1.50;
+        baseCost += (6 * laborMin) + powerCost(shopRates.Press_Watts, 6) + 1.50;
     }
-
     if (type === 'laser' || type === 'hybrid') {
         const lm = parseFloat(document.getElementById('laserMins').value);
-        // Uses the laser rate (machine wear) + your labor rate for that time
-        baseCost += 2.00 + (lm * (lRate + laborPerMin)) + powerCost(watts, lm);
+        baseCost += 2.00 + (lm * (lRate + laborMin)) + powerCost(watts, lm);
     }
 
     let itemTotal = (baseCost * shopRates.Markup) * qty;
