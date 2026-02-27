@@ -95,7 +95,7 @@
         <textarea id="jobNotes" placeholder="Details (Size, Color, etc.)" style="height:60px;"></textarea>
         
         <div id="laserTimeContainer" style="display:none; background: #bbdefb; padding: 15px; border-radius: 8px; margin-top: 10px;">
-            <label style="color:#0d47a1;">TOTAL Laser Time (All Items Mins)</label>
+            <label style="color:#0d47a1;">TOTAL Laser Time (Batch Mins)</label>
             <input type="number" id="laserMins" value="10">
         </div>
 
@@ -152,7 +152,7 @@ async function fetchAllData() {
         const catRes = await fetch(proxy + encodeURIComponent(catalogUrl));
         const catData = await catRes.text();
         catalogData = catData.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { 
-            const c = r.split(','); return { name: c[0].replace(/"/g, ""), price: parseFloat(c[1]) || 0 }; 
+            const c = r.split(','); return { name: c[0].replace(/"/g, "").trim(), price: parseFloat(c[1]) || 0 }; 
         });
         const setRes = await fetch(proxy + encodeURIComponent(settingsUrl));
         const setData = await setRes.text();
@@ -191,30 +191,27 @@ function calculateCost() {
     const type = document.getElementById('type').value;
     const module = document.getElementById('laserModule').value;
     const setupUsed = document.getElementById('applySetup').value === 'yes';
+    const markup = shopRates.Markup || 1;
     
+    // 1. Marked up Material Cost
+    let materialCost = (document.getElementById('provided').value === 'no') ? (item.price * qty) : (1.50 * qty);
+    let materialTotal = materialCost * markup;
+    
+    // 2. Pure Time-based costs (No markup applied here)
+    const laborMinRate = (shopRates.Labor_Rate || 30) / 60;
     const laserRunRate = (module === '40w') ? (shopRates.Diode_Rate || 0) : (shopRates.IR_Rate || 0);
-    const materialCost = (document.getElementById('provided').value === 'no') ? (item.price * qty) : (1.50 * qty);
-    const laborMinRate = (shopRates.Labor_Rate || 0) / 60;
-    
     const isLaser = (type === 'laser' || type === 'hybrid');
     const totalMins = isLaser ? (parseFloat(document.getElementById('laserMins').value) || 0) : (6 * qty);
     
-    let timeBasedCost = (totalMins * laborMinRate);
-    if (isLaser) timeBasedCost += (totalMins * laserRunRate);
+    let timeCost = (totalMins * (laborMinRate + laserRunRate));
+    if (setupUsed) timeCost += (shopRates.Setup_Fee || 0);
 
-    let rawSubtotal = materialCost + timeBasedCost;
-    if (setupUsed) rawSubtotal += (shopRates.Setup_Fee || 0);
-
-    return (rawSubtotal * (shopRates.Markup || 1));
+    return materialTotal + timeCost;
 }
 
 function handleMainAction() {
-    if (document.getElementById('itemSelect').value === "") {
-        alert("Please select an item first!");
-        return;
-    }
-    if (editingIndex === -1) addItemToQuote();
-    else finishUpdate();
+    if (document.getElementById('itemSelect').value === "") return alert("Select an item first!");
+    if (editingIndex === -1) addItemToQuote(); else finishUpdate();
 }
 
 function addItemToQuote() {
@@ -223,9 +220,7 @@ function addItemToQuote() {
     const desc = `${itemText} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`;
     
     quoteItems.push({ 
-        desc: desc, 
-        qty: document.getElementById('qty').value, 
-        total: calculateCost(),
+        desc: desc, qty: document.getElementById('qty').value, total: calculateCost(),
         raw: {
             itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, 
             module: document.getElementById('laserModule').value, setup: document.getElementById('applySetup').value, 
