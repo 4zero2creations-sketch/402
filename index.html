@@ -68,7 +68,7 @@
         </div>
     </div>
     <div class="grid">
-        <div><label>Item Selection</label><select id="itemSelect"><option value="">-- Sync First --</option></select></div>
+        <div><label>Item</label><select id="itemSelect"><option value="">-- Sync First --</option></select></div>
         <div><label>Setup Fee?</label><select id="applySetup"><option value="no">No</option><option value="yes">Yes</option></select></div>
     </div>
     <label>Job Notes</label>
@@ -246,15 +246,9 @@ function recordQuote() {
     let summary = quoteItems.map(i => `${i.qty}x ${i.desc}`).join(" | ") + " " + taxStatus;
     const total = encodeURIComponent(document.getElementById('grandTotal').innerText);
     
-    // Final universal URL formatting for the recording
-    const params = [
-        `entry.1592314545=${name}`,
-        `entry.1989487532=${encodeURIComponent(summary)}`,
-        `entry.101375962=Multiple`,
-        `entry.1075677943=${total}`
-    ].join('&');
-
-    const finalUrl = `${formUrl}?usp=pp_url&${params}`;
+    // We force a clean URL without any extra session data
+    const finalUrl = `${formUrl}?usp=pp_url&entry.1592314545=${name}&entry.1989487532=${encodeURIComponent(summary)}&entry.101375962=Multiple&entry.1075677943=${total}`;
+    
     window.open(finalUrl, '_blank');
 }
 
