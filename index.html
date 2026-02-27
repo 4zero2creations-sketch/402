@@ -19,26 +19,29 @@
         .btn-sync { background: #1976d2; color: white; border-bottom: 4px solid #1565c0; }
         .btn-new-quote { background: #607d8b; color: white; border-bottom: 4px solid #455a64; }
         .btn-add { background: #d32f2f; color: white; font-size: 18px; margin-top: 20px; border-bottom: 4px solid #b71c1c; }
+        .btn-update-active { background: #2e7d32 !important; color: white !important; }
         .btn-pdf { background: #546e7a; color: white; }
         .btn-record { background: #ff9800; color: white; border-bottom: 4px solid #e68a00; }
-        .btn-remove { background: #c62828; color: white; padding: 6px; border-radius: 4px; cursor: pointer; }
+        .btn-remove, .btn-edit { padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; }
+        .btn-edit { background: #1976d2; color: white; margin-right: 5px; }
+        .btn-remove { background: #c62828; color: white; }
         table { width: 100%; margin-top: 20px; border-collapse: collapse; background: #eee; border-radius: 8px; overflow: hidden; table-layout: fixed; }
         th { background: #455a64; color: white; padding: 12px; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid #ccc; word-wrap: break-word; }
         .grand-total-box { font-size: 2em; background: #fff9c4; padding: 20px; border: 3px solid #fbc02d; text-align: center; border-radius: 12px; margin-top: 20px; }
         .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         #sync-status { font-size: 12px; text-align: center; margin-top: 8px; font-weight: bold; }
+        
         #custInfoSummary { display: none; margin-bottom: 20px; line-height: 1.4; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
+        #printTerms { display: none; margin-top: 30px; font-size: 10px; color: #555; border-top: 1px solid #ccc; padding-top: 10px; }
 
-        /* 2. PRINT/PDF VIEW STYLES */
         @media print {
             @page { margin: 0.5in; }
             body { background: white !important; padding: 0 !important; }
             .container { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; background: white !important; }
             .no-print, button, .adj-box, .section-label, .logo-area p.logo-4, #sync-status, label, input, select, textarea, .btn-add { display: none !important; }
             #resultBox { display: block !important; }
-            #custInfoSummary { display: block !important; }
-            #pdf-content { width: 98% !important; margin: auto !important; }
+            #custInfoSummary, #printTerms { display: block !important; }
             table { width: 100% !important; border: 1px solid #333 !important; background: white !important; table-layout: fixed !important; }
             th { background: #eee !important; color: black !important; border: 1px solid #333 !important; }
             td { border: 1px solid #333 !important; color: black !important; }
@@ -51,10 +54,7 @@
 <body>
 
 <div class="container">
-    <div class="logo-area">
-        <p class="logo-4 no-print">4</p>
-        <p class="logo-text">4 Zero 2 Creations</p>
-    </div>
+    <div class="logo-area"><p class="logo-4 no-print">4</p><p class="logo-text">4 Zero 2 Creations</p></div>
     
     <div class="no-print">
         <div class="grid">
@@ -109,20 +109,22 @@
     <div id="resultBox" style="display:none;">
         <div id="pdf-content">
             <div id="custInfoSummary">
-                <strong id="printName"></strong><br>
-                <span id="printAddr"></span><br>
-                <span id="printPhone"></span> | <span id="printEmail"></span>
+                <strong id="printName"></strong><br><span id="printAddr"></span><br><span id="printPhone"></span> | <span id="printEmail"></span>
             </div>
             <h2 style="color:#d32f2f; margin:0; text-align: center;">SHOP QUOTE</h2>
             <p style="text-align:center; font-size: 0.8em; margin: 5px 0;">Date: <span id="quoteDate"></span></p>
             <table id="quoteTable">
-                <thead><tr><th>Details</th><th>Qty</th><th>Total</th><th class="no-print">X</th></tr></thead>
+                <thead><tr><th>Details</th><th>Qty</th><th>Total</th><th class="no-print">Edit/X</th></tr></thead>
                 <tbody id="quoteBody"></tbody>
             </table>
             <div class="grand-total-box">
                 <div id="final-discount-line" style="color: #d32f2f; font-size: 0.5em;"></div>
                 <div id="tax-line" style="font-size: 0.5em; color: #455a64;"></div>
                 <strong>Total: $<span id="grandTotal">0.00</span></strong>
+            </div>
+            <div id="printTerms">
+                <strong>TERMS & CONDITIONS</strong><br>
+                1. 50% deposit required on custom orders. 2. Turnaround is 3-7 business days. 3. No returns on custom items. 4. Not responsible for damage to customer-provided items. 5. Payment confirms approval of design/qty.
             </div>
         </div>
         <div class="adj-box no-print">
@@ -137,7 +139,7 @@
 </div>
 
 <script>
-let catalogData = [], shopRates = {}, quoteItems = [];
+let catalogData = [], shopRates = {}, quoteItems = [], editingIndex = -1;
 const catalogUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?output=csv";
 const settingsUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?gid=1511041891&single=true&output=csv"; 
 const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94BxLsUcKHa8uN9hC6UqxjB8r6ZeBfg/viewform";
@@ -185,12 +187,11 @@ function calculateCost() {
     const watts = (module === '40w') ? shopRates.Diode_Watts : shopRates.IR_Watts;
     const lRate = (module === '40w') ? shopRates.Diode_Rate : shopRates.IR_Rate;
     let baseCost = (document.getElementById('provided').value === 'no') ? item.price : 1.50;
-    const powerCost = (w, m) => (w / 1000) * (m / 60) * shopRates.kWh_Rate;
     const laborMin = shopRates.Labor_Rate / 60;
-    if (type === 'dtf' || type === 'hybrid') baseCost += (6 * laborMin) + powerCost(shopRates.Press_Watts, 6) + 1.50;
+    if (type === 'dtf' || type === 'hybrid') baseCost += (6 * laborMin);
     if (type === 'laser' || type === 'hybrid') {
         const lm = parseFloat(document.getElementById('laserMins').value);
-        baseCost += 2.00 + (lm * (lRate + laborMin)) + powerCost(watts, lm);
+        baseCost += (lm * (lRate + laborMin));
     }
     let total = (baseCost * shopRates.Markup) * qty;
     if (setupUsed) total += shopRates.Setup_Fee;
@@ -198,18 +199,66 @@ function calculateCost() {
 }
 
 function handleMainAction() {
+    if (editingIndex === -1) addItemToQuote();
+    else finishUpdate();
+}
+
+function addItemToQuote() {
     if (document.getElementById('itemSelect').value === "") return alert("Sync first!");
     const typeVal = document.getElementById('type').value;
     const desc = `${catalogData[document.getElementById('itemSelect').value].name} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`;
-    quoteItems.push({ desc: desc, qty: document.getElementById('qty').value, total: calculateCost() });
-    renderQuote();
+    quoteItems.push({ 
+        desc: desc, qty: document.getElementById('qty').value, total: calculateCost(),
+        raw: {
+            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, module: document.getElementById('laserModule').value, 
+            setup: document.getElementById('applySetup').value, notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
+            qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
+        }
+    });
+    renderQuote(); resetEntry();
+}
+
+function editItem(index) {
+    const itm = quoteItems[index].raw;
+    editingIndex = index;
+    document.getElementById('itemSelect').value = itm.itemIdx;
+    document.getElementById('type').value = itm.type;
+    document.getElementById('laserModule').value = itm.module;
+    document.getElementById('applySetup').value = itm.setup;
+    document.getElementById('jobNotes').value = itm.notes;
+    document.getElementById('laserMins').value = itm.laserMins;
+    document.getElementById('qty').value = itm.qty;
+    document.getElementById('provided').value = itm.provided;
+    handleProcessChange();
+    const btn = document.getElementById('mainActionButton');
+    btn.innerHTML = "✅ Update Item";
+    btn.classList.add('btn-update-active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function finishUpdate() {
+    const typeVal = document.getElementById('type').value;
+    quoteItems[editingIndex] = {
+        desc: `${catalogData[document.getElementById('itemSelect').value].name} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`,
+        qty: document.getElementById('qty').value, total: calculateCost(),
+        raw: {
+            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, module: document.getElementById('laserModule').value, 
+            setup: document.getElementById('applySetup').value, notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
+            qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
+        }
+    };
+    editingIndex = -1;
+    const btn = document.getElementById('mainActionButton');
+    btn.innerHTML = "➕ Add Item to Quote";
+    btn.classList.remove('btn-update-active');
+    renderQuote(); resetEntry();
 }
 
 function renderQuote() {
     const body = document.getElementById('quoteBody'); body.innerHTML = ""; let subTotal = 0;
     quoteItems.forEach((item, index) => { 
         subTotal += item.total; 
-        body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print"><button class="btn-remove" onclick="removeItem(${index})">X</button></td></tr>`; 
+        body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print"><button class="btn-edit" onclick="editItem(${index})">✎</button><button class="btn-remove" onclick="removeItem(${index})">X</button></td></tr>`; 
     });
     const disc = parseFloat(document.getElementById('manualDiscount').value) || 0, discAmt = subTotal * (disc / 100), sub = subTotal - discAmt;
     let taxAmt = 0; const tRate = parseFloat(document.getElementById('taxOverride').value) / 100;
@@ -218,25 +267,18 @@ function renderQuote() {
     document.getElementById('final-discount-line').innerText = disc > 0 ? `Discount (${disc}%): -$${discAmt.toFixed(2)}` : "";
     document.getElementById('tax-line').innerText = taxAmt > 0 ? `Tax (${(tRate*100).toFixed(1)}%): +$${taxAmt.toFixed(2)}` : "";
     document.getElementById('grandTotal').innerText = (sub + taxAmt).toFixed(2);
+    document.getElementById('outName').innerText = document.getElementById('custName').value || "Customer";
     document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
 }
 
 function recordQuote() {
-    const ids = { 
-        name: "entry.41675885", addr: "entry.1917367442", phone: "entry.1646977282", 
-        email: "entry.2012487868", item: "entry.1633428776", qty: "entry.892135426", total: "entry.920745966" 
-    };
-    const url = `${formUrl}?usp=pp_url&${ids.name}=${encodeURIComponent(document.getElementById('custName').value)}` +
-                `&${ids.addr}=${encodeURIComponent(document.getElementById('custAddr').value)}` +
-                `&${ids.phone}=${encodeURIComponent(document.getElementById('custPhone').value)}` +
-                `&${ids.email}=${encodeURIComponent(document.getElementById('custEmail').value)}` +
-                `&${ids.item}=${encodeURIComponent(quoteItems.map(i => i.desc).join(" | "))}` +
-                `&${ids.qty}=${encodeURIComponent(quoteItems.map(i => i.qty).join(", "))}` +
-                `&${ids.total}=${encodeURIComponent(document.getElementById('grandTotal').innerText)}`;
+    const ids = { name: "entry.41675885", addr: "entry.1917367442", phone: "entry.1646977282", email: "entry.2012487868", item: "entry.1633428776", qty: "entry.892135426", total: "entry.920745966" };
+    const url = `${formUrl}?usp=pp_url&${ids.name}=${encodeURIComponent(document.getElementById('custName').value)}&${ids.addr}=${encodeURIComponent(document.getElementById('custAddr').value)}&${ids.phone}=${encodeURIComponent(document.getElementById('custPhone').value)}&${ids.email}=${encodeURIComponent(document.getElementById('custEmail').value)}&${ids.item}=${encodeURIComponent(quoteItems.map(i => i.desc).join(" | "))}&${ids.qty}=${encodeURIComponent(quoteItems.map(i => i.qty).join(", "))}&${ids.total}=${encodeURIComponent(document.getElementById('grandTotal').innerText)}`;
     window.open(url, '_blank');
 }
 
 function startNewQuote() { if (confirm("Clear quote?")) { quoteItems = []; document.querySelectorAll('input').forEach(i => i.value = ""); renderQuote(); } }
+function resetEntry() { document.getElementById('jobNotes').value = ""; document.getElementById('qty').value = "1"; }
 function removeItem(index) { quoteItems.splice(index, 1); renderQuote(); }
 window.onload = fetchAllData;
 </script>
