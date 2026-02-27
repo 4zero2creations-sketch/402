@@ -16,15 +16,24 @@
         button { width: 100%; padding: 14px; margin-top: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-sync { background: #1976d2; color: white; border-bottom: 4px solid #1565c0; }
         .btn-add { background: #d32f2f; color: white; font-size: 18px; margin-top: 20px; border-bottom: 4px solid #b71c1c; }
+        .btn-update-active { background: #2e7d32 !important; color: white !important; }
+        .btn-pdf { background: #546e7a; color: white; }
+        .btn-record { background: #ff9800; color: white; border-bottom: 4px solid #e68a00; }
+        .btn-remove, .btn-edit { padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; width: auto; display: inline-block; margin-top: 0; }
+        .btn-edit { background: #1976d2; color: white; margin-right: 5px; }
+        .btn-remove { background: #c62828; color: white; }
         #sync-status { text-align: center; font-size: 12px; margin-top: 8px; font-weight: bold; }
         .grand-total-box { font-size: 2em; background: #fff9c4; padding: 20px; border: 3px solid #fbc02d; text-align: center; border-radius: 12px; margin-top: 20px; }
         table { width: 100%; margin-top: 20px; border-collapse: collapse; background: #eee; border-radius: 8px; overflow: hidden; table-layout: fixed; }
         th { background: #455a64; color: white; padding: 12px; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid #ccc; word-wrap: break-word; }
+        #printTerms { display: none; margin-top: 30px; font-size: 10px; color: #555; border-top: 1px solid #ccc; padding-top: 10px; }
 
         @media print {
-            .no-print, button, .section-label, label, input, select, textarea { display: none !important; }
+            .no-print, button, .section-label, label, input, select, textarea, .btn-add { display: none !important; }
+            #printTerms { display: block !important; }
             .container { box-shadow: none !important; border: none !important; width: 100% !important; background: white !important; }
+            table th:last-child, table td:last-child { display: none !important; } /* Hide Edit/X column on print */
         }
     </style>
 </head>
@@ -91,20 +100,30 @@
     </div>
 
     <div id="resultBox" style="display:none;">
+        <span class="section-label no-print">2. Summary</span>
         <table id="quoteTable">
-            <thead><tr><th>Details</th><th>Qty</th><th>Total</th><th class="no-print">X</th></tr></thead>
+            <thead><tr><th>Details</th><th>Qty</th><th>Total</th><th class="no-print">Edit/X</th></tr></thead>
             <tbody id="quoteBody"></tbody>
         </table>
         <div class="grand-total-box"><strong>Total: $<span id="grandTotal">0.00</span></strong></div>
-        <div class="grid no-print"><button onclick="window.print()">🖨️ Print Quote</button></div>
+        
+        <div id="printTerms">
+            <strong>TERMS & CONDITIONS:</strong> 50% deposit required on custom orders. No returns on custom items. Payment confirms approval of design/qty.
+        </div>
+
+        <div class="grid no-print">
+            <button class="btn-pdf" onclick="window.print()">🖨️ Print / Save PDF</button>
+            <button class="btn-record" onclick="recordQuote()">💾 Record Order</button>
+        </div>
     </div>
 </div>
 
 <script>
-let catalogData = [], shopRates = {}, feeExamples = [], quoteItems = [];
+let catalogData = [], shopRates = {}, quoteItems = [], editingIndex = -1;
 const catalogUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?output=csv";
 const settingsUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?gid=1511041891&single=true&output=csv"; 
 const feesUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?gid=413242066&single=true&output=csv"; 
+const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94BxLsUcKHa8uN9hC6UqxjB8r6ZeBfg/viewform";
 const proxy = "https://corsproxy.io/?";
 
 async function fetchAllData() {
@@ -125,7 +144,7 @@ async function fetchAllData() {
         });
 
         const feeSelect = document.getElementById('feeExample');
-        feeSelect.innerHTML = '<option value="0">-- Example Pricing --</option>';
+        feeSelect.innerHTML = '<option value="0">-- Select Example --</option>';
         fee.split('\n').filter(r => r.trim() !== '').slice(1).forEach(r => {
             const c = r.split(',');
             const opt = document.createElement('option');
@@ -161,8 +180,10 @@ function handleProcessChange() {
     document.getElementById('laserTimeContainer').style.display = (type === 'laser' || type === 'hybrid') ? 'block' : 'none';
 }
 
-function calculateBaseLineCost() {
-    const itm = catalogData[document.getElementById('itemSelect').value];
+function calculateCost() {
+    const itmIdx = document.getElementById('itemSelect').value;
+    if (itmIdx === "") return 0;
+    const itm = catalogData[itmIdx];
     const qty = parseInt(document.getElementById('qty').value) || 1;
     const process = document.getElementById('type').value;
     const laborMin = (shopRates.Labor_Rate || 30) / 60;
@@ -193,22 +214,41 @@ function calculateBaseLineCost() {
 function handleMainAction() {
     if (document.getElementById('itemSelect').value === "") return alert("Select an item!");
     const itmText = catalogData[document.getElementById('itemSelect').value].name;
-    const process = document.getElementById('type').value.toUpperCase();
+    const process = document.getElementById('type').value;
+    const cost = calculateCost();
     
-    // Line Item Cost
-    const lineCost = calculateBaseLineCost();
-    quoteItems.push({ desc: `${itmText} [${process}]`, qty: document.getElementById('qty').value, total: lineCost });
-    
-    // Add Setup Fee as its own line item if selected
+    const itemData = {
+        desc: `${itmText} [${process.toUpperCase()}]`,
+        qty: document.getElementById('qty').value,
+        total: cost,
+        raw: {
+            itemIdx: document.getElementById('itemSelect').value,
+            type: process,
+            qty: document.getElementById('qty').value,
+            w: document.getElementById('dtfWidth').value,
+            h: document.getElementById('dtfHeight').value,
+            prep: document.getElementById('prepMins').value,
+            laserM: document.getElementById('laserModule').value,
+            laserT: document.getElementById('laserMins').value
+        }
+    };
+
+    if (editingIndex === -1) {
+        quoteItems.push(itemData);
+    } else {
+        quoteItems[editingIndex] = itemData;
+        editingIndex = -1;
+        document.getElementById('mainActionButton').innerHTML = "➕ Add Item to Quote";
+        document.getElementById('mainActionButton').classList.remove('btn-update-active');
+    }
+
     if (document.getElementById('applySetup').value === 'yes') {
         const feeAmt = parseFloat(document.getElementById('manualSetupFee').value) || 0;
-        const feeDesc = document.getElementById('feeExample').options[document.getElementById('feeExample').selectedIndex].text.split(' ($')[0];
-        quoteItems.push({ desc: `Processing Fee: ${feeDesc === '-- Select Example --' ? 'Custom Design/Prep' : feeDesc}`, qty: 1, total: feeAmt });
-        // Reset setup fee dropdown so it doesn't add it twice by accident
+        quoteItems.push({ desc: "Setup / Processing Fee", qty: 1, total: feeAmt, raw: null });
         document.getElementById('applySetup').value = 'no';
         toggleSetupFee();
     }
-    
+
     renderQuote();
 }
 
@@ -216,14 +256,38 @@ function renderQuote() {
     const body = document.getElementById('quoteBody'); body.innerHTML = ""; let grandTotal = 0;
     quoteItems.forEach((item, index) => { 
         grandTotal += item.total; 
-        body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print"><button onclick="removeItem(${index})">X</button></td></tr>`; 
+        const editBtn = item.raw ? `<button class="btn-edit" onclick="editItem(${index})">✎</button>` : '';
+        body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print">${editBtn}<button class="btn-remove" onclick="removeItem(${index})">X</button></td></tr>`; 
     });
     document.getElementById('grandTotal').innerText = grandTotal.toFixed(2);
     document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
 }
 
-function startNewQuote() { quoteItems = []; renderQuote(); }
+function editItem(index) {
+    const itm = quoteItems[index].raw;
+    if (!itm) return;
+    editingIndex = index;
+    document.getElementById('itemSelect').value = itm.itemIdx;
+    document.getElementById('type').value = itm.type;
+    document.getElementById('qty').value = itm.qty;
+    document.getElementById('dtfWidth').value = itm.w;
+    document.getElementById('dtfHeight').value = itm.h;
+    document.getElementById('prepMins').value = itm.prep;
+    document.getElementById('laserModule').value = itm.laserM;
+    document.getElementById('laserMins').value = itm.laserT;
+    handleProcessChange(); checkDtfItem();
+    document.getElementById('mainActionButton').innerHTML = "✅ Update Item";
+    document.getElementById('mainActionButton').classList.add('btn-update-active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function startNewQuote() { if(confirm("Clear current quote?")) { quoteItems = []; renderQuote(); } }
 function removeItem(index) { quoteItems.splice(index, 1); renderQuote(); }
+function recordQuote() {
+    const ids = { item: "entry.1633428776", qty: "entry.892135426", total: "entry.920745966" };
+    const url = `${formUrl}?usp=pp_url&${ids.item}=${encodeURIComponent(quoteItems.map(i => i.desc).join(" | "))}&${ids.qty}=${encodeURIComponent(quoteItems.map(i => i.qty).join(", "))}&${ids.total}=${encodeURIComponent(document.getElementById('grandTotal').innerText)}`;
+    window.open(url, '_blank');
+}
 window.onload = fetchAllData;
 </script>
 </body>
