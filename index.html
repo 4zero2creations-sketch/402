@@ -88,9 +88,18 @@
             </div>
         </div>
         <div class="grid">
-            <div><label>Item Selection</label><select id="itemSelect"><option value="">-- Sync First --</option></select></div>
+            <div><label>Item Selection</label><select id="itemSelect" onchange="checkDtfItem()"><option value="">-- Sync First --</option></select></div>
             <div><label>Setup Fee?</label><select id="applySetup"><option value="no">No</option><option value="yes">Yes</option></select></div>
         </div>
+
+        <div id="dtfDimensions" style="display:none; background: #e8f5e9; padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid #a5d6a7;">
+            <p style="margin:0 0 10px 0; font-weight:bold; font-size:0.8em; color:#2e7d32;">DTF Dim (Sq/In Pricing)</p>
+            <div class="grid">
+                <div><label>Width (in)</label><input type="number" id="dtfWidth" value="0" step="0.1"></div>
+                <div><label>Height (in)</label><input type="number" id="dtfHeight" value="0" step="0.1"></div>
+            </div>
+        </div>
+
         <label>Job Notes</label>
         <textarea id="jobNotes" placeholder="Details (Size, Color, etc.)" style="height:60px;"></textarea>
         
@@ -169,6 +178,11 @@ async function fetchAllData() {
     } catch (e) { document.getElementById('sync-status').innerText = "❌ Sync Error"; }
 }
 
+function checkDtfItem() {
+    const itmText = catalogData[document.getElementById('itemSelect').value]?.name || "";
+    document.getElementById('dtfDimensions').style.display = itmText.toUpperCase().includes("DTF") ? 'block' : 'none';
+}
+
 function handleProcessChange() {
     const type = document.getElementById('type').value;
     const isLaser = (type === 'laser' || type === 'hybrid');
@@ -193,10 +207,17 @@ function calculateCost() {
     const setupUsed = document.getElementById('applySetup').value === 'yes';
     const markup = shopRates.Markup || 1;
     
-    // Marked up Material Cost, flat labor/laser time
-    let materialCost = (document.getElementById('provided').value === 'no') ? (item.price * qty) : (1.50 * qty);
-    let materialTotal = materialCost * markup;
+    // RETAIL LOGIC: Check if it's a DTF Square Inch item
+    let materialCost;
+    if (item.name.toUpperCase().includes("DTF")) {
+        const w = parseFloat(document.getElementById('dtfWidth').value) || 0;
+        const h = parseFloat(document.getElementById('dtfHeight').value) || 0;
+        materialCost = (w * h) * item.price * qty;
+    } else {
+        materialCost = (document.getElementById('provided').value === 'no') ? (item.price * qty) : (1.50 * qty);
+    }
     
+    let materialTotal = materialCost * markup;
     const laborMinRate = (shopRates.Labor_Rate || 30) / 60;
     const laserRunRate = (module === '40w') ? (shopRates.Diode_Rate || 0) : (shopRates.IR_Rate || 0);
     const isLaser = (type === 'laser' || type === 'hybrid');
@@ -209,7 +230,7 @@ function calculateCost() {
 }
 
 function handleMainAction() {
-    if (document.getElementById('itemSelect').value === "") return alert("Select an item first!");
+    if (document.getElementById('itemSelect').value === "") return alert("Select an item!");
     if (editingIndex === -1) addItemToQuote(); else finishUpdate();
 }
 
@@ -223,7 +244,8 @@ function addItemToQuote() {
             itemIdx: itemIdx, type: typeVal, 
             module: document.getElementById('laserModule').value, setup: document.getElementById('applySetup').value, 
             notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
-            qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
+            qty: document.getElementById('qty').value, provided: document.getElementById('provided').value,
+            w: document.getElementById('dtfWidth').value, h: document.getElementById('dtfHeight').value
         }
     });
     renderQuote(); resetEntry();
@@ -240,7 +262,10 @@ function editItem(index) {
     document.getElementById('laserMins').value = itm.laserMins;
     document.getElementById('qty').value = itm.qty;
     document.getElementById('provided').value = itm.provided;
+    document.getElementById('dtfWidth').value = itm.w || 0;
+    document.getElementById('dtfHeight').value = itm.h || 0;
     handleProcessChange();
+    checkDtfItem();
     const btn = document.getElementById('mainActionButton');
     btn.innerHTML = "✅ Update Item";
     btn.classList.add('btn-update-active');
@@ -257,7 +282,8 @@ function finishUpdate() {
             itemIdx: itemIdx, type: typeVal, 
             module: document.getElementById('laserModule').value, setup: document.getElementById('applySetup').value, 
             notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
-            qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
+            qty: document.getElementById('qty').value, provided: document.getElementById('provided').value,
+            w: document.getElementById('dtfWidth').value, h: document.getElementById('dtfHeight').value
         }
     };
     editingIndex = -1;
@@ -288,7 +314,7 @@ function recordQuote() {
 }
 
 function startNewQuote() { if (confirm("Clear quote?")) { quoteItems = []; document.querySelectorAll('input').forEach(i => i.value = ""); renderQuote(); } }
-function resetEntry() { document.getElementById('jobNotes').value = ""; document.getElementById('qty').value = "1"; }
+function resetEntry() { document.getElementById('jobNotes').value = ""; document.getElementById('qty').value = "1"; document.getElementById('dtfWidth').value = "0"; document.getElementById('dtfHeight').value = "0"; }
 function removeItem(index) { quoteItems.splice(index, 1); renderQuote(); }
 window.onload = fetchAllData;
 </script>
