@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4 Zero 2 Creations | Shop Master</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; color: #333; }
+        .container { max-width: 700px; margin: auto; background: white; padding: 35px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-top: 8px solid #d32f2f; }
+        .logo-area { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+        .logo-4 { font-size: 80px; font-weight: 900; color: #d32f2f; line-height: 1; margin: 0; }
+        .logo-text { font-size: 24px; text-transform: uppercase; font-weight: bold; margin: 0; }
+        
+        .section-label { background: #455a64; color: white; padding: 10px; font-weight: bold; margin-top: 25px; border-radius: 6px; display: block; text-align: center; font-size: 0.8em; text-transform: uppercase; }
+        label { font-weight: bold; display: block; margin-top: 15px; font-size: 0.85em; color: #555; }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button { width: 100%; padding: 14px; margin-top: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        
+        .btn-sync { background: #1976d2; color: white; border-bottom: 4px solid #1565c0; }
+        .btn-calc { background: #d32f2f; color: white; font-size: 18px; margin-top: 20px; }
+        .btn-pdf { background: #546e7a; color: white; }
+        .btn-record { background: #ff9800; color: white; border-bottom: 4px solid #e68a00; }
+        .btn-shared { background: #2e7d32; color: white; }
+
+        .result-box { margin-top: 25px; padding: 25px; background: #fafafa; border: 2px solid #ddd; display: none; border-radius: 10px; }
+        #sync-status { font-size: 12px; text-align: center; margin-top: 8px; color: #2e7d32; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo-area">
+        <p class="logo-4">4</p>
+        <p class="logo-text">Zero 2 Creations</p>
+    </div>
+
+    <button class="btn-sync" onclick="fetchSheetData()">🔄 Sync Catalog from Google Sheets</button>
+    <div id="sync-status">Status: Not Synced</div>
+
+    <span class="section-label">1. Customer & Item</span>
+    <label>Customer Name</label>
+    <input type="text" id="custName" placeholder="Enter Name">
+
+    <div class="grid">
+        <div>
+            <label>Process</label>
+            <select id="type" onchange="toggleDimensions()">
+                <option value="dtf">DTF (3-Press)</option>
+                <option value="laser">Laser (xTool S1)</option>
+            </select>
+        </div>
+        <div>
+            <label>Catalog Item</label>
+            <select id="itemSelect"><option value="">-- Sync First --</option></select>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div><label id="lblA">Width (Inches)</label><input type="number" id="dimA" value="10"></div>
+        <div id="dimBContainer"><label>Height (Inches)</label><input type="number" id="dimB" value="12"></div>
+    </div>
+
+    <div class="grid">
+        <div><label>Quantity</label><input type="number" id="qty" value="1"></div>
+        <div>
+            <label>Sourcing</label>
+            <select id="provided">
+                <option value="no">Shop Provides</option>
+                <option value="yes">Customer Provides</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="btn-calc" onclick="calculate()">Generate Quote</button>
+
+    <div id="resultBox" class="result-box">
+        <div id="pdf-content">
+            <h2 style="color:#d32f2f; margin:0;">Quote for <span id="outName"></span></h2>
+            <p id="outDetails"></p>
+            <p style="font-size: 1.5em; background: #fffde7; padding: 15px; border: 1px solid #ffd54f; text-align: center;"><strong>Total: $<span id="outTotal"></span></strong></p>
+        </div>
+        <button class="btn-pdf" onclick="savePDF()">Download PDF</button>
+        <button class="btn-record" onclick="recordQuote()">💾 Record to Spreadsheet</button>
+        <button class="btn-shared" onclick="sendWebmail()">Email Quote</button>
+    </div>
+</div>
+
+<script>
+let catalogData = [];
+// Your CSV Link
+const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?output=csv";
+// Your Form Link
+const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94BxLsUcKHa8uN9hC6UqxjB8r6ZeBfg/viewform?usp=pp_url";
+
+async function fetchSheetData() {
+    document.getElementById('sync-status').innerText = "⌛ Syncing...";
+    const proxyUrl = "https://corsproxy.io/?";
+    try {
+        const response = await fetch(proxyUrl + encodeURIComponent(sheetUrl));
+        const data = await response.text();
+        const rows = data.split('\n').filter(row => row.trim() !== '').slice(1);
+        catalogData = rows.map(row => {
+            const cols = row.split(',');
+            return { name: cols[0].replace(/"/g, "").trim(), price: parseFloat(cols[1]) || 0 };
+        });
+        const select = document.getElementById('itemSelect');
+        select.innerHTML = "";
+        catalogData.forEach((item, i) => {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.text = `${item.name} ($${item.price.toFixed(2)})`;
+            select.add(opt);
+        });
+        document.getElementById('sync-status').innerText = "✅ " + catalogData.length + " Items Loaded";
+    } catch (e) { document.getElementById('sync-status').innerText = "❌ Sync Error"; }
+}
+
+function calculate() {
+    const itemIdx = document.getElementById('itemSelect').value;
+    if (itemIdx === "") return alert("Please sync and select an item.");
+    const item = catalogData[itemIdx];
+    const qty = parseInt(document.getElementById('qty').value);
+    const type = document.getElementById('type').value;
+    const dimA = parseFloat(document.getElementById('dimA').value);
+    const dimB = parseFloat(document.getElementById('dimB').value) || 1;
+    
+    let cost = (type === 'dtf') ? (dimA * dimB * 0.03) + 1.75 : (dimA * 1.50);
+    cost += (document.getElementById('provided').value === 'no') ? item.price : 1.50;
+
+    let total = (cost * 2.5) * qty;
+    document.getElementById('outName').innerText = document.getElementById('custName').value || "Customer";
+    document.getElementById('outDetails').innerHTML = `<strong>Item:</strong> ${item.name}<br><strong>Qty:</strong> ${qty}`;
+    document.getElementById('outTotal').innerText = total.toFixed(2);
+    document.getElementById('resultBox').style.display = 'block';
+}
+
+function recordQuote() {
+    const name = encodeURIComponent(document.getElementById('custName').value);
+    const item = encodeURIComponent(catalogData[document.getElementById('itemSelect').value].name);
+    const qty = encodeURIComponent(document.getElementById('qty').value);
+    const total = encodeURIComponent(document.getElementById('outTotal').innerText);
+    window.open(`${formUrl}&entry.1592314545=${name}&entry.1989487532=${item}&entry.101375962=${qty}&entry.1075677943=${total}`, '_blank');
+}
+
+function savePDF() { html2pdf().from(document.getElementById('pdf-content')).save('402_Quote.pdf'); }
+function sendWebmail() { window.open("https://mail.google.com/mail/?view=cm&fs=1&to=&su=Quote&body=Total: $" + document.getElementById('outTotal').innerText); }
+
+function toggleDimensions() {
+    const type = document.getElementById('type').value;
+    document.getElementById('dimBContainer').style.display = (type === 'dtf') ? 'block' : 'none';
+    document.getElementById('lblA').innerText = (type === 'dtf') ? 'Width (Inches)' : 'Machine Time (Min)';
+}
+</script>
+</body>
+</html>
