@@ -183,43 +183,51 @@ function updatePrintInfo() {
 }
 
 function calculateCost() {
-    const itemIdx = document.getElementById('itemSelect').value;
-    if (itemIdx === "") return 0;
+    const itemSelect = document.getElementById('itemSelect');
+    if (!itemSelect.value) return 0;
     
-    const item = catalogData[itemIdx];
+    const item = catalogData[itemSelect.value];
     const qty = parseInt(document.getElementById('qty').value) || 1;
     const type = document.getElementById('type').value;
     const module = document.getElementById('laserModule').value;
     const setupUsed = document.getElementById('applySetup').value === 'yes';
     
-    const laborMinRate = (shopRates.Labor_Rate || 30) / 60;
     const laserRunRate = (module === '40w') ? (shopRates.Diode_Rate || 0) : (shopRates.IR_Rate || 0);
+    const materialCost = (document.getElementById('provided').value === 'no') ? (item.price * qty) : (1.50 * qty);
+    const laborMinRate = (shopRates.Labor_Rate || 0) / 60;
+    
     const isLaser = (type === 'laser' || type === 'hybrid');
     const totalMins = isLaser ? (parseFloat(document.getElementById('laserMins').value) || 0) : (6 * qty);
     
-    let materialCost = (document.getElementById('provided').value === 'no') ? (item.price * qty) : (1.50 * qty);
-    let timeCost = (totalMins * (laborMinRate + laserRunRate));
-    
-    let rawSubtotal = materialCost + timeCost;
+    let timeBasedCost = (totalMins * laborMinRate);
+    if (isLaser) timeBasedCost += (totalMins * laserRunRate);
+
+    let rawSubtotal = materialCost + timeBasedCost;
     if (setupUsed) rawSubtotal += (shopRates.Setup_Fee || 0);
 
     return (rawSubtotal * (shopRates.Markup || 1));
 }
 
 function handleMainAction() {
-    if (document.getElementById('itemSelect').value === "") return alert("Select an item!");
-    if (editingIndex === -1) addItemToQuote(); else finishUpdate();
+    if (document.getElementById('itemSelect').value === "") {
+        alert("Please select an item first!");
+        return;
+    }
+    if (editingIndex === -1) addItemToQuote();
+    else finishUpdate();
 }
 
 function addItemToQuote() {
     const typeVal = document.getElementById('type').value;
-    const itemIdx = document.getElementById('itemSelect').value;
-    const desc = `${catalogData[itemIdx].name} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`;
+    const itemText = catalogData[document.getElementById('itemSelect').value].name;
+    const desc = `${itemText} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`;
     
     quoteItems.push({ 
-        desc: desc, qty: document.getElementById('qty').value, total: calculateCost(),
+        desc: desc, 
+        qty: document.getElementById('qty').value, 
+        total: calculateCost(),
         raw: {
-            itemIdx: itemIdx, type: typeVal, 
+            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, 
             module: document.getElementById('laserModule').value, setup: document.getElementById('applySetup').value, 
             notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
             qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
@@ -248,12 +256,12 @@ function editItem(index) {
 
 function finishUpdate() {
     const typeVal = document.getElementById('type').value;
-    const itemIdx = document.getElementById('itemSelect').value;
+    const itemText = catalogData[document.getElementById('itemSelect').value].name;
     quoteItems[editingIndex] = {
-        desc: `${catalogData[itemIdx].name} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`,
+        desc: `${itemText} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`,
         qty: document.getElementById('qty').value, total: calculateCost(),
         raw: {
-            itemIdx: itemIdx, type: typeVal, 
+            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, 
             module: document.getElementById('laserModule').value, setup: document.getElementById('applySetup').value, 
             notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
             qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
@@ -279,7 +287,6 @@ function renderQuote() {
     document.getElementById('final-discount-line').innerText = disc > 0 ? `Discount (${disc}%): -$${discAmt.toFixed(2)}` : "";
     document.getElementById('tax-line').innerText = taxAmt > 0 ? `Tax (${(tRate*100).toFixed(1)}%): +$${taxAmt.toFixed(2)}` : "";
     document.getElementById('grandTotal').innerText = (sub + taxAmt).toFixed(2);
-    document.getElementById('outName').innerText = document.getElementById('custName').value || "Customer";
     document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
 }
 
