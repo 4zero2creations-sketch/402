@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4 Zero 2 Creations | Shop Master Pro</title>
     <style>
-        /* 1. APP VIEW STYLES (What you see on screen) */
+        /* 1. APP VIEW STYLES */
         body { font-family: 'Segoe UI', sans-serif; background: #757575; padding: 20px; color: #333; }
         .container { max-width: 850px; margin: auto; background: #e0e0e0; padding: 35px; border-radius: 15px; box-shadow: 0 4px 25px rgba(0,0,0,0.3); border-top: 10px solid #d32f2f; }
         .logo-area { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #bdbdbd; padding-bottom: 15px; }
@@ -19,31 +19,32 @@
         .btn-sync { background: #1976d2; color: white; border-bottom: 4px solid #1565c0; }
         .btn-new-quote { background: #607d8b; color: white; border-bottom: 4px solid #455a64; }
         .btn-add { background: #d32f2f; color: white; font-size: 18px; margin-top: 20px; border-bottom: 4px solid #b71c1c; }
-        .btn-update-active { background: #2e7d32 !important; color: white !important; }
         .btn-pdf { background: #546e7a; color: white; }
         .btn-record { background: #ff9800; color: white; border-bottom: 4px solid #e68a00; }
-        .btn-remove, .btn-edit { padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-edit { background: #1976d2; color: white; margin-right: 5px; }
-        .btn-remove { background: #c62828; color: white; }
-        table { width: 100%; margin-top: 20px; border-collapse: collapse; background: #eee; border-radius: 8px; overflow: hidden; }
+        .btn-remove { background: #c62828; color: white; padding: 6px; border-radius: 4px; cursor: pointer; }
+        table { width: 100%; margin-top: 20px; border-collapse: collapse; background: #eee; border-radius: 8px; overflow: hidden; table-layout: fixed; }
         th { background: #455a64; color: white; padding: 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #ccc; }
+        td { padding: 12px; border-bottom: 1px solid #ccc; word-wrap: break-word; }
         .grand-total-box { font-size: 2em; background: #fff9c4; padding: 20px; border: 3px solid #fbc02d; text-align: center; border-radius: 12px; margin-top: 20px; }
         .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         #sync-status { font-size: 12px; text-align: center; margin-top: 8px; font-weight: bold; }
+        #custInfoSummary { display: none; margin-bottom: 20px; line-height: 1.4; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
 
-        /* 2. PRINT/PDF VIEW STYLES (What the PDF looks like) */
+        /* 2. PRINT/PDF VIEW STYLES */
         @media print {
+            @page { margin: 0.5in; }
             body { background: white !important; padding: 0 !important; }
-            .container { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; background: white !important; }
+            .container { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; background: white !important; }
             .no-print, button, .adj-box, .section-label, .logo-area p.logo-4, #sync-status, label, input, select, textarea, .btn-add { display: none !important; }
             #resultBox { display: block !important; }
-            table { border: 1px solid #333 !important; background: white !important; }
+            #custInfoSummary { display: block !important; }
+            #pdf-content { width: 98% !important; margin: auto !important; }
+            table { width: 100% !important; border: 1px solid #333 !important; background: white !important; table-layout: fixed !important; }
             th { background: #eee !important; color: black !important; border: 1px solid #333 !important; }
             td { border: 1px solid #333 !important; color: black !important; }
+            th:nth-child(1) { width: 65%; } th:nth-child(2) { width: 15%; } th:nth-child(3) { width: 20%; }
             .grand-total-box { border: 2px solid black !important; background: white !important; color: black !important; }
-            .logo-area { border-bottom: 2px solid black !important; margin-bottom: 30px !important; }
-            .logo-text { font-size: 32px !important; color: black !important; display: block !important; }
+            .logo-text { font-size: 32px !important; color: black !important; text-align: center; width: 100%; display: block !important; }
         }
     </style>
 </head>
@@ -51,7 +52,7 @@
 
 <div class="container">
     <div class="logo-area">
-        <p class="logo-4">4</p>
+        <p class="logo-4 no-print">4</p>
         <p class="logo-text">4 Zero 2 Creations</p>
     </div>
     
@@ -62,8 +63,15 @@
         </div>
         <div id="sync-status">Status: Ready</div>
 
-        <span class="section-label">1. Customer Info</span>
-        <input type="text" id="custName" placeholder="Customer Name">
+        <span class="section-label">1. Customer Details</span>
+        <div class="grid">
+            <input type="text" id="custName" placeholder="Full Name" oninput="updatePrintInfo()">
+            <input type="text" id="custPhone" placeholder="Phone Number" oninput="updatePrintInfo()">
+        </div>
+        <div class="grid" style="margin-top:10px;">
+            <input type="text" id="custEmail" placeholder="Email Address" oninput="updatePrintInfo()">
+            <input type="text" id="custAddr" placeholder="Address" oninput="updatePrintInfo()">
+        </div>
 
         <span class="section-label">2. Item Entry</span>
         <div class="grid">
@@ -94,14 +102,18 @@
             <div><label>Quantity</label><input type="number" id="qty" value="1"></div>
             <div><label>Sourcing</label><select id="provided"><option value="no">Shop Provides</option><option value="yes">Customer Provides</option></select></div>
         </div>
-        
         <button class="btn-add" id="mainActionButton" onclick="handleMainAction()">➕ Add Item to Quote</button>
     </div>
 
     <span class="section-label no-print">3. Summary</span>
     <div id="resultBox" style="display:none;">
         <div id="pdf-content">
-            <h2 style="color:#d32f2f; margin:0; text-align: center;" id="quoteTitle">Quote for: <span id="outName"></span></h2>
+            <div id="custInfoSummary">
+                <strong id="printName"></strong><br>
+                <span id="printAddr"></span><br>
+                <span id="printPhone"></span> | <span id="printEmail"></span>
+            </div>
+            <h2 style="color:#d32f2f; margin:0; text-align: center;">SHOP QUOTE</h2>
             <p style="text-align:center; font-size: 0.8em; margin: 5px 0;">Date: <span id="quoteDate"></span></p>
             <table id="quoteTable">
                 <thead><tr><th>Details</th><th>Qty</th><th>Total</th><th class="no-print">X</th></tr></thead>
@@ -125,7 +137,7 @@
 </div>
 
 <script>
-let catalogData = [], shopRates = {}, quoteItems = [], editingIndex = -1;
+let catalogData = [], shopRates = {}, quoteItems = [];
 const catalogUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?output=csv";
 const settingsUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?gid=1511041891&single=true&output=csv"; 
 const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94BxLsUcKHa8uN9hC6UqxjB8r6ZeBfg/viewform";
@@ -156,7 +168,13 @@ async function fetchAllData() {
 function handleProcessChange() {
     const type = document.getElementById('type').value;
     document.getElementById('laserTimeContainer').style.display = (type === 'laser' || type === 'hybrid') ? 'block' : 'none';
-    document.getElementById('laserModule').disabled = (type === 'dtf');
+}
+
+function updatePrintInfo() {
+    document.getElementById('printName').innerText = document.getElementById('custName').value;
+    document.getElementById('printAddr').innerText = document.getElementById('custAddr').value;
+    document.getElementById('printPhone').innerText = document.getElementById('custPhone').value;
+    document.getElementById('printEmail').innerText = document.getElementById('custEmail').value;
 }
 
 function calculateCost() {
@@ -180,23 +198,11 @@ function calculateCost() {
 }
 
 function handleMainAction() {
-    if (editingIndex === -1) addItemToQuote();
-    else finishUpdate();
-}
-
-function addItemToQuote() {
     if (document.getElementById('itemSelect').value === "") return alert("Sync first!");
     const typeVal = document.getElementById('type').value;
     const desc = `${catalogData[document.getElementById('itemSelect').value].name} [${typeVal.toUpperCase()}] - ${document.getElementById('jobNotes').value || 'Standard'}`;
-    quoteItems.push({ 
-        desc: desc, qty: document.getElementById('qty').value, total: calculateCost(),
-        raw: {
-            itemIdx: document.getElementById('itemSelect').value, type: document.getElementById('type').value, module: document.getElementById('laserModule').value, 
-            setup: document.getElementById('applySetup').value, notes: document.getElementById('jobNotes').value, laserMins: document.getElementById('laserMins').value, 
-            qty: document.getElementById('qty').value, provided: document.getElementById('provided').value
-        }
-    });
-    renderQuote(); resetEntry();
+    quoteItems.push({ desc: desc, qty: document.getElementById('qty').value, total: calculateCost() });
+    renderQuote();
 }
 
 function renderQuote() {
@@ -212,22 +218,25 @@ function renderQuote() {
     document.getElementById('final-discount-line').innerText = disc > 0 ? `Discount (${disc}%): -$${discAmt.toFixed(2)}` : "";
     document.getElementById('tax-line').innerText = taxAmt > 0 ? `Tax (${(tRate*100).toFixed(1)}%): +$${taxAmt.toFixed(2)}` : "";
     document.getElementById('grandTotal').innerText = (sub + taxAmt).toFixed(2);
-    document.getElementById('outName').innerText = document.getElementById('custName').value || "Customer";
     document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
 }
 
 function recordQuote() {
-    const nameVal = document.getElementById('custName').value || "Walk-in";
-    const itemVal = quoteItems.map(i => i.desc).join(" | ");
-    const qtyVal = quoteItems.map(i => i.qty).join(", ");
-    const totalVal = document.getElementById('grandTotal').innerText;
-    const ids = { name: "entry.41675885", item: "entry.1633428776", qty: "entry.892135426", total: "entry.920745966" };
-    const finalUrl = `${formUrl}?usp=pp_url&${ids.name}=${encodeURIComponent(nameVal)}&${ids.item}=${encodeURIComponent(itemVal)}&${ids.qty}=${encodeURIComponent(qtyVal)}&${ids.total}=${encodeURIComponent(totalVal)}`;
-    window.open(finalUrl, '_blank');
+    const ids = { 
+        name: "entry.41675885", addr: "entry.1917367442", phone: "entry.1646977282", 
+        email: "entry.2012487868", item: "entry.1633428776", qty: "entry.892135426", total: "entry.920745966" 
+    };
+    const url = `${formUrl}?usp=pp_url&${ids.name}=${encodeURIComponent(document.getElementById('custName').value)}` +
+                `&${ids.addr}=${encodeURIComponent(document.getElementById('custAddr').value)}` +
+                `&${ids.phone}=${encodeURIComponent(document.getElementById('custPhone').value)}` +
+                `&${ids.email}=${encodeURIComponent(document.getElementById('custEmail').value)}` +
+                `&${ids.item}=${encodeURIComponent(quoteItems.map(i => i.desc).join(" | "))}` +
+                `&${ids.qty}=${encodeURIComponent(quoteItems.map(i => i.qty).join(", "))}` +
+                `&${ids.total}=${encodeURIComponent(document.getElementById('grandTotal').innerText)}`;
+    window.open(url, '_blank');
 }
 
-function startNewQuote() { if (confirm("Clear quote?")) { quoteItems = []; document.getElementById('custName').value = ""; renderQuote(); } }
-function resetEntry() { document.getElementById('jobNotes').value = ""; document.getElementById('qty').value = "1"; }
+function startNewQuote() { if (confirm("Clear quote?")) { quoteItems = []; document.querySelectorAll('input').forEach(i => i.value = ""); renderQuote(); } }
 function removeItem(index) { quoteItems.splice(index, 1); renderQuote(); }
 window.onload = fetchAllData;
 </script>
