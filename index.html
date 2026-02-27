@@ -82,7 +82,7 @@
                     <option value="hybrid">DTF + Laser Hybrid</option>
                 </select>
             </div>
-            <div><label>Laser Module</label>
+            <div id="laserModuleContainer" style="display:none;"><label>Laser Module</label>
                 <select id="laserModule">
                     <option value="40w">40W Diode (S1)</option>
                     <option value="2w">2W IR (S1)</option>
@@ -95,9 +95,12 @@
         </div>
         <label>Job Notes</label>
         <textarea id="jobNotes" placeholder="Details (Size, Color, etc.)" style="height:60px;"></textarea>
+        
         <div id="laserTimeContainer" style="display:none; background: #bbdefb; padding: 15px; border-radius: 8px; margin-top: 10px;">
-            <label>TOTAL Laser Time (All Items Mins)</label><input type="number" id="laserMins" value="10">
+            <label style="color:#0d47a1;">TOTAL Laser Time (All Items Mins)</label>
+            <input type="number" id="laserMins" value="10">
         </div>
+
         <div class="grid" style="margin-top:10px;">
             <div><label>Quantity</label><input type="number" id="qty" value="1"></div>
             <div><label>Sourcing</label><select id="provided"><option value="no">Shop Provides</option><option value="yes">Customer Provides</option></select></div>
@@ -169,7 +172,9 @@ async function fetchAllData() {
 
 function handleProcessChange() {
     const type = document.getElementById('type').value;
-    document.getElementById('laserTimeContainer').style.display = (type === 'laser' || type === 'hybrid') ? 'block' : 'none';
+    const isLaser = (type === 'laser' || type === 'hybrid');
+    document.getElementById('laserModuleContainer').style.display = isLaser ? 'block' : 'none';
+    document.getElementById('laserTimeContainer').style.display = isLaser ? 'block' : 'none';
 }
 
 function updatePrintInfo() {
@@ -191,10 +196,11 @@ function calculateCost() {
     
     // 2. Time-based costs (Total Batch Mins)
     const laborMinRate = shopRates.Labor_Rate / 60;
-    const totalMins = (type === 'laser' || type === 'hybrid') ? parseFloat(document.getElementById('laserMins').value) : (6 * qty);
+    const isLaser = (type === 'laser' || type === 'hybrid');
+    const totalMins = isLaser ? parseFloat(document.getElementById('laserMins').value) : (6 * qty);
     
     let timeBasedCost = (totalMins * laborMinRate);
-    if (type === 'laser' || type === 'hybrid') timeBasedCost += (totalMins * laserRunRate);
+    if (isLaser) timeBasedCost += (totalMins * laserRunRate);
 
     // 3. Final Sum
     let rawSubtotal = materialCost + timeBasedCost;
