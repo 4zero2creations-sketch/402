@@ -187,14 +187,12 @@ function updatePrintInfo() {
 function calculateCost() {
     const itemIdx = document.getElementById('itemSelect').value;
     const item = catalogData[itemIdx], qty = parseInt(document.getElementById('qty').value);
-    const type = document.getElementById('type').value, module = document.getElementById('laserModule').value;
+    const type = document.getElementById('type').value;
+    const module = document.getElementById('laserModule').value;
     const setupUsed = document.getElementById('applySetup').value === 'yes';
     const laserRunRate = (module === '40w') ? shopRates.Diode_Rate : shopRates.IR_Rate;
     
-    // 1. Material Base
     let materialCost = (document.getElementById('provided').value === 'no') ? (item.price * qty) : (1.50 * qty);
-    
-    // 2. Time-based costs (Total Batch Mins)
     const laborMinRate = shopRates.Labor_Rate / 60;
     const isLaser = (type === 'laser' || type === 'hybrid');
     const totalMins = isLaser ? parseFloat(document.getElementById('laserMins').value) : (6 * qty);
@@ -202,11 +200,9 @@ function calculateCost() {
     let timeBasedCost = (totalMins * laborMinRate);
     if (isLaser) timeBasedCost += (totalMins * laserRunRate);
 
-    // 3. Final Sum
     let rawSubtotal = materialCost + timeBasedCost;
     if (setupUsed) rawSubtotal += shopRates.Setup_Fee;
 
-    // 4. Apply Markup at the very end
     return (rawSubtotal * shopRates.Markup);
 }
 
