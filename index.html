@@ -5,43 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4 Zero 2 Creations | Shop Master Pro</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #333; padding: 20px; color: #333; }
+        /* BASE STYLING */
+        body { font-family: 'Segoe UI', sans-serif; background: #333; padding: 20px; color: #333; line-height: 1.5; }
         .container { max-width: 850px; margin: auto; background: #eee; padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border-top: 10px solid #d32f2f; }
         .logo-text { font-size: 28px; text-transform: uppercase; font-weight: 800; text-align: center; display: block; margin-bottom: 20px; color: #111; border-bottom: 2px solid #ccc; padding-bottom: 10px; }
-        .card { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
+        
+        /* MODULAR CARDS */
+        .card { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .card-title { font-size: 0.85em; font-weight: 900; color: #d32f2f; text-transform: uppercase; margin-bottom: 15px; display: block; border-left: 5px solid #d32f2f; padding-left: 12px; }
+        
+        /* INPUTS & GRID */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         label { font-weight: bold; font-size: 0.85em; display: block; margin-bottom: 5px; color: #444; }
         input, select { width: 100%; padding: 12px; border: 1px solid #bbb; border-radius: 6px; box-sizing: border-box; font-size: 15px; background: #fafafa; }
+        
+        /* BUTTONS */
         button { cursor: pointer; font-weight: bold; text-transform: uppercase; border-radius: 6px; border: none; transition: 0.2s; }
         .btn-sync { background: #1976d2; color: white; padding: 10px 20px; font-size: 0.8em; border-bottom: 3px solid #0d47a1; }
         .btn-add { background: #d32f2f; color: white; padding: 18px; width: 100%; font-size: 1.1em; margin-top: 10px; border-bottom: 5px solid #b71c1c; }
         .btn-update-active { background: #2e7d32 !important; border-bottom-color: #1b5e20 !important; }
         .btn-edit { background: #1976d2; color: white; padding: 6px 10px; font-size: 0.8em; margin-right: 5px; }
         .btn-remove { background: #c62828; color: white; padding: 6px 10px; font-size: 0.8em; }
-        table { width: 100%; margin-top: 15px; border-collapse: collapse; table-layout: fixed; }
+        
+        /* QUOTE SUMMARY */
+        table { width: 100%; margin-top: 15px; border-collapse: collapse; background: #fff; table-layout: fixed; }
         th { background: #455a64; color: white; padding: 12px; text-align: left; font-size: 0.85em; }
         td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9em; word-wrap: break-word; }
         .grand-total-box { font-size: 2.2em; text-align: center; padding: 25px; background: #fff9c4; border: 3px solid #fbc02d; border-radius: 10px; margin-top: 20px; }
         .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #90a4ae; }
+
+        /* PRINT LOGIC */
         #printHeader { display: none; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
         #printTerms { display: none; margin-top: 30px; font-size: 10px; border-top: 1px solid #ccc; padding-top: 10px; font-style: italic; }
 
         @media print {
             @page { size: portrait; margin: 0.5in; }
-            body { background: white !important; padding: 0 !important; margin: 0 !important; }
             .no-print, button, .card-title, .adj-box, #sync-status { display: none !important; }
-            .container { 
-                box-shadow: none !important; border: none !important; 
-                width: 100% !important; max-width: 100% !important; 
-                background: white !important; padding: 0 !important; margin: 0 !important;
-            }
-            .card { border: none !important; padding: 0 !important; }
+            body { background: white !important; padding: 0 !important; }
+            .container { box-shadow: none !important; border: none !important; width: 100% !important; background: white !important; padding: 0 !important; margin: 0 !important; }
+            .card { border: none !important; padding: 0 !important; box-shadow: none !important; }
             #printHeader, #printTerms { display: block !important; width: 100% !important; }
-            table { width: 100% !important; border: 1px solid #000 !important; }
+            table { border: 1px solid #000 !important; width: 100% !important; }
             th { background: #ddd !important; color: #000 !important; border-bottom: 2px solid #000 !important; }
             th:last-child, td:last-child { display: none !important; }
-            .grand-total-box { border: 2px solid #000 !important; background: #fff !important; width: 98% !important; margin: 20px auto !important; }
+            .grand-total-box { border: 2px solid #000 !important; background: #fff !important; width: 95% !important; margin: 20px auto !important; }
         }
     </style>
 </head>
@@ -70,12 +77,13 @@
             </div>
             <div class="grid" style="margin-top:10px;">
                 <select id="sourcing"><option value="shop">Shop Provides Blank</option><option value="cust">Customer Provides Blank</option></select>
-                <button class="btn-sync" onclick="fetchAllData()">🔄 Sync Shop Data</button>
+                <button class="btn-sync" onclick="fetchAllData()">🔄 Sync All Shop Data</button>
             </div>
+            <div id="sync-status" style="text-align:center; font-size:11px; margin-top:5px;">Ready</div>
         </div>
 
         <div class="card">
-            <span class="card-title">2. Job Builder</span>
+            <span class="card-title">2. Build Your Product</span>
             <div class="grid">
                 <div><label>Process Type</label>
                     <select id="process" onchange="updateUI()">
@@ -91,31 +99,33 @@
 
             <div id="blankRow" class="grid" style="margin-top:15px;">
                 <div><label>Blank Item</label><select id="blankSelect"><option value="">-- Sync First --</option></select></div>
-                <div><label>Size / Details</label><input type="text" id="itemSize" placeholder="XL, Hat, etc."></div>
+                <div><label>Item Size/Detail</label><input type="text" id="itemSize" placeholder="XL, Hat, etc."></div>
             </div>
 
             <div id="decoRow" class="grid" style="margin-top:15px;">
-                <div><label>Material</label><select id="transferSelect"><option value="">-- Sync First --</option></select></div>
-                <div><label>Width x Height (Inches)</label>
+                <div><label>Transfer / Decoration</label><select id="transferSelect"><option value="">-- Sync First --</option></select></div>
+                <div><label>Dimensions (WxH inches)</label>
                     <div style="display:flex; gap:5px;"><input type="number" id="w" placeholder="W" step="0.1"><input type="number" id="h" placeholder="H" step="0.1"></div>
                 </div>
             </div>
 
             <div id="laserRow" class="grid" style="margin-top:15px; display:none;">
                 <div><label>Laser Module</label><select id="laserModule"><option value="40w">40W Diode</option><option value="2w">2W IR</option></select></div>
-                <div><label>Laser Time (Mins)</label><input type="number" id="laserMins" value="10"></div>
+                <div><label>Total Laser Time (Mins)</label><input type="number" id="laserMins" value="10"></div>
             </div>
 
             <div class="grid" style="margin-top:15px;">
-                <div><label>Optional Prep Fee</label><select id="feeSelect"><option value="">-- None --</option></select></div>
+                <div><label>Optional Prep Fee</label><select id="feeSelect" onchange="applyFee()"><option value="0">-- None --</option></select></div>
+                <div id="manualFeeBox" style="display:none;"><label>Confirmed Fee ($)</label><input type="number" id="manualFee" value="0.00" step="0.01"></div>
             </div>
 
-            <button class="btn-add" id="mainActionButton" onclick="handleMainAction()">➕ Add to Quote</button>
+            <button class="btn-add" id="mainActionButton" onclick="handleMainAction()">➕ Add Compound Item to Quote</button>
         </div>
     </div>
 
     <div id="resultBox" style="display:none;">
         <div class="card">
+            <span class="card-title no-print">3. Quote Summary</span>
             <table id="quoteTable">
                 <thead><tr><th style="width:60%">Description</th><th style="width:10%">Qty</th><th style="width:15%">Total</th><th class="no-print" style="width:15%">Edit/X</th></tr></thead>
                 <tbody id="quoteBody"></tbody>
@@ -136,7 +146,11 @@
                 <div id="tax-line" style="font-size: 0.5em; color: #455a64;"></div>
                 <strong>TOTAL: $<span id="grandTotal">0.00</span></strong>
             </div>
-            <div id="printTerms"><strong>TERMS:</strong> 50% deposit required. No returns on custom items. Final payment confirms approval.</div>
+
+            <div id="printTerms">
+                <strong>TERMS:</strong> 50% deposit required. No returns on custom items. Payment confirms approval.
+            </div>
+
             <div class="grid no-print" style="margin-top:20px;">
                 <button style="background:#546e7a; color:white;" onclick="window.print()">🖨️ Print Quote</button>
                 <button style="background:#ff9800; color:white;" onclick="recordQuote()">💾 Record Order</button>
@@ -155,13 +169,14 @@ const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94Bx
 async function fetchAllData() {
     try {
         const [b, s, f, t] = await Promise.all(Object.values(urls).map(url => fetch(proxy + encodeURIComponent(url)).then(r => r.text())));
-        blanks = b.split('\n').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
-        transfers = t.split('\n').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
-        fees = f.split('\n').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
+        blanks = b.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
+        transfers = t.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
+        fees = f.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
         s.split('\n').forEach(r => { const c = r.split(','); shopRates[c[0].trim()] = parseFloat(c[1]); });
         fillSelect('blankSelect', blanks); fillSelect('transferSelect', transfers); fillSelect('feeSelect', fees);
         document.getElementById('quoteDate').innerText = new Date().toLocaleDateString();
-    } catch (e) { alert("Sync Error!"); }
+        document.getElementById('sync-status').innerText = "✅ Ready";
+    } catch (e) { document.getElementById('sync-status').innerText = "❌ Sync Error"; }
 }
 
 function fillSelect(id, data) {
@@ -183,76 +198,89 @@ function updateUI() {
     document.getElementById('laserRow').style.display = (p === 'laser' || p === 'hybrid') ? 'grid' : 'none';
 }
 
+function applyFee() {
+    const fIdx = document.getElementById('feeSelect').value;
+    if (fIdx !== "0") { document.getElementById('manualFeeBox').style.display = 'block'; document.getElementById('manualFee').value = fees[fIdx].p; }
+    else { document.getElementById('manualFeeBox').style.display = 'none'; }
+}
+
 function calculateCost() {
     const p = document.getElementById('process').value, q = parseInt(document.getElementById('qty').value) || 1;
     const markup = shopRates.Markup || 1, laborMin = (shopRates.Labor_Rate || 30) / 60;
-    const printerRate = (shopRates.Printer_Rate || 0) / 60, pressRate = (shopRates.Press_Rate || 0);
-    const kwRate = 0.12 / 60, pressPower = ((shopRates.Press_Watts || 1500) / 1000) * kwRate;
-    let material = 0;
+    const printLabor = (shopRates.Print_Labor_Rate || laborMin);
+    const printerRate = (shopRates.Printer_Rate || 0) / 60;
+    const kwRate = 0.12 / 60;
+    const printerPower = ((shopRates.Printer_Watts || 300) / 1000) * kwRate;
+    const pressPower = ((shopRates.Press_Watts || 1500) / 1000) * kwRate;
+    const pressRate = (shopRates.Press_Rate || 0);
+
+    let mat = 0;
     if (p !== 'press_only') {
         const bIdx = document.getElementById('blankSelect').value, tIdx = document.getElementById('transferSelect').value;
         const bCost = (document.getElementById('sourcing').value === 'shop' && bIdx !== "") ? blanks[bIdx].p : 0;
         const w = parseFloat(document.getElementById('w').value) || 0, h = parseFloat(document.getElementById('h').value) || 0;
         const tCost = (tIdx !== "") ? (w * h * transfers[tIdx].p) : 0;
-        material = (bCost + tCost) * markup * q;
+        mat = (bCost + tCost) * markup * q;
     }
+
     let labor = 0;
-    if (p.includes('dtf') || p === 'transfer_only') labor += (15 * (laborMin + printerRate));
+    if (p.includes('dtf') || p === 'transfer_only') labor += (15 * (printLabor + printerRate + printerPower));
     if (p === 'dtf_full' || p === 'press_only' || p === 'hybrid') labor += (6 * q * (laborMin + pressPower + pressRate));
     if (p === 'laser' || p === 'hybrid') {
         const lRate = (document.getElementById('laserModule').value === '40w' ? shopRates.Diode_Rate : shopRates.IR_Rate) || 0;
         labor += (parseFloat(document.getElementById('laserMins').value) || 0) * (laborMin + lRate);
     }
-    return material + labor;
+    return mat + labor;
 }
 
 function handleMainAction() {
-    const p = document.getElementById('process').value, q = document.getElementById('qty').value;
-    const bIdx = document.getElementById('blankSelect').value, tIdx = document.getElementById('transferSelect').value;
-    const size = document.getElementById('itemSize').value;
+    const p = document.getElementById('process').value, bIdx = document.getElementById('blankSelect').value;
+    const tIdx = document.getElementById('transferSelect').value, size = document.getElementById('itemSize').value, q = document.getElementById('qty').value;
     let desc = "";
-    if (p === 'press_only') desc = "Heat Press Labor Only";
+    if (p === 'press_only') desc = "Heat Press Labor Only (Customer Blank)";
     else {
         if (bIdx !== "") desc += blanks[bIdx].n + (size ? ` [${size}]` : "");
         if (tIdx !== "") desc += ` w/ ${document.getElementById('w').value}x${document.getElementById('h').value} ${transfers[tIdx].n}`;
     }
-    const itemData = { desc: desc || "Custom Item", qty: q, total: calculateCost(),
+    const itemData = { desc, qty: q, total: calculateCost(),
         raw: { p, q, bIdx, tIdx, size, w: document.getElementById('w').value, h: document.getElementById('h').value, lM: document.getElementById('laserModule').value, lT: document.getElementById('laserMins').value }
     };
     if (editingIndex === -1) { quoteItems.push(itemData); } 
-    else { quoteItems[editingIndex] = itemData; editingIndex = -1; document.getElementById('mainActionButton').innerHTML = "➕ Add to Quote"; document.getElementById('mainActionButton').classList.remove('btn-update-active'); }
-
+    else { quoteItems[editingIndex] = itemData; editingIndex = -1; document.getElementById('mainActionButton').innerHTML = "➕ Add Compound Item"; }
+    
     const fIdx = document.getElementById('feeSelect').value;
-    if (fIdx !== "") { quoteItems.push({ desc: `Fee: ${fees[fIdx].n}`, qty: 1, total: fees[fIdx].p, raw: null }); document.getElementById('feeSelect').value = ""; }
+    if (fIdx !== "0") { quoteItems.push({ desc: `Fee: ${fees[fIdx].n}`, qty: 1, total: parseFloat(document.getElementById('manualFee').value) || 0, raw: null }); document.getElementById('feeSelect').value = "0"; applyFee(); }
     renderQuote();
 }
 
 function renderQuote() {
-    const body = document.getElementById('quoteBody'); body.innerHTML = ""; let sub = 0;
-    quoteItems.forEach((item, i) => { 
-        sub += item.total; 
-        const editBtn = item.raw ? `<button class="btn-edit" onclick="editItem(${i})">✎</button>` : '';
-        body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print">${editBtn}<button class="btn-remove" onclick="remove(${i})">X</button></td></tr>`; 
+    const body = document.getElementById('quoteBody'); body.innerHTML = ""; let subTotal = 0;
+    quoteItems.forEach((item, index) => { 
+        subTotal += item.total; 
+        const editBtn = item.raw ? `<button class="btn-edit" onclick="editItem(${index})">✎</button>` : '';
+        body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print">${editBtn}<button class="btn-remove" onclick="removeItem(${index})">X</button></td></tr>`; 
     });
-    const disc = parseFloat(document.getElementById('manualDiscount').value) || 0, running = sub * (1 - disc / 100);
-    let tax = 0; if (document.getElementById('applyTax').checked) tax = running * (parseFloat(document.getElementById('taxOverride').value) / 100);
-    document.getElementById('disc-line').innerText = disc > 0 ? `Discount: -$${(sub * disc / 100).toFixed(2)}` : "";
-    document.getElementById('tax-line').innerText = tax > 0 ? `Tax: +$${tax.toFixed(2)}` : "";
-    document.getElementById('grandTotal').innerText = (running + tax).toFixed(2);
+    const disc = parseFloat(document.getElementById('manualDiscount').value) || 0, runningSub = subTotal * (1 - disc / 100);
+    let taxAmt = 0; const tRate = parseFloat(document.getElementById('taxOverride').value) / 100;
+    if (document.getElementById('applyTax').checked) taxAmt = runningSub * tRate;
+    document.getElementById('disc-line').innerText = disc > 0 ? `Discount: -$${(subTotal * disc / 100).toFixed(2)}` : "";
+    document.getElementById('tax-line').innerText = taxAmt > 0 ? `Tax: +$${taxAmt.toFixed(2)}` : "";
+    document.getElementById('grandTotal').innerText = (runningSub + taxAmt).toFixed(2);
     document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
 }
 
-function editItem(i) {
-    const itm = quoteItems[i].raw; editingIndex = i;
+function editItem(index) {
+    const itm = quoteItems[index].raw; editingIndex = index;
     document.getElementById('process').value = itm.p; document.getElementById('qty').value = itm.q;
     document.getElementById('blankSelect').value = itm.bIdx; document.getElementById('itemSize').value = itm.size;
     document.getElementById('transferSelect').value = itm.tIdx; document.getElementById('w').value = itm.w;
     document.getElementById('h').value = itm.h; document.getElementById('laserModule').value = itm.lM; document.getElementById('laserMins').value = itm.lT;
-    updateUI(); document.getElementById('mainActionButton').innerHTML = "✅ Update Item"; document.getElementById('mainActionButton').classList.add('btn-update-active');
+    updateUI(); document.getElementById('mainActionButton').innerHTML = "✅ Update Item";
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function remove(i) { quoteItems.splice(i, 1); renderQuote(); }
+function removeItem(index) { quoteItems.splice(index, 1); renderQuote(); }
+function startNewQuote() { if(confirm("Start fresh?")) { quoteItems = []; renderQuote(); } }
 function recordQuote() {
     const ids = { item: "entry.1633428776", qty: "entry.892135426", total: "entry.920745966" };
     const url = `${formUrl}?usp=pp_url&${ids.item}=${encodeURIComponent(quoteItems.map(i => i.desc).join(" | "))}&${ids.qty}=${encodeURIComponent(quoteItems.map(i => i.qty).join(", "))}&${ids.total}=${encodeURIComponent(document.getElementById('grandTotal').innerText)}`;
