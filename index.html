@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4 Zero 2 Creations | Shop Master Pro</title>
     <style>
-        /* BASE STYLING */
-        body { font-family: 'Segoe UI', sans-serif; background: #333; padding: 20px; color: #333; line-height: 1.5; }
+        /* BASE STYLING - High Contrast for the Bench */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #333; padding: 20px; color: #333; line-height: 1.5; }
         .container { max-width: 850px; margin: auto; background: #eee; padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border-top: 10px solid #d32f2f; }
         .logo-text { font-size: 28px; text-transform: uppercase; font-weight: 800; text-align: center; display: block; margin-bottom: 20px; color: #111; border-bottom: 2px solid #ccc; padding-bottom: 10px; }
         
@@ -34,21 +34,21 @@
         .grand-total-box { font-size: 2.2em; text-align: center; padding: 25px; background: #fff9c4; border: 3px solid #fbc02d; border-radius: 10px; margin-top: 20px; }
         .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #90a4ae; }
 
-        /* PRINT LOGIC */
+        /* PRINT LOGIC - Fixing the Right Side Cutoff */
         #printHeader { display: none; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
         #printTerms { display: none; margin-top: 30px; font-size: 10px; border-top: 1px solid #ccc; padding-top: 10px; font-style: italic; }
 
         @media print {
             @page { size: portrait; margin: 0.5in; }
             .no-print, button, .card-title, .adj-box, #sync-status { display: none !important; }
-            body { background: white !important; padding: 0 !important; }
+            body { background: white !important; padding: 0 !important; zoom: 0.98; }
             .container { box-shadow: none !important; border: none !important; width: 100% !important; background: white !important; padding: 0 !important; margin: 0 !important; }
             .card { border: none !important; padding: 0 !important; box-shadow: none !important; }
             #printHeader, #printTerms { display: block !important; width: 100% !important; }
             table { border: 1px solid #000 !important; width: 100% !important; }
             th { background: #ddd !important; color: #000 !important; border-bottom: 2px solid #000 !important; }
             th:last-child, td:last-child { display: none !important; }
-            .grand-total-box { border: 2px solid #000 !important; background: #fff !important; width: 95% !important; margin: 20px auto !important; }
+            .grand-total-box { border: 2px solid #000 !important; background: #fff !important; width: 94% !important; margin: 20px auto !important; }
         }
     </style>
 </head>
@@ -58,8 +58,8 @@
     <div class="logo-text">4 Zero 2 Creations</div>
 
     <div id="printHeader">
-        <div style="float:right; text-align:right;"><strong>DATE:</strong> <span id="quoteDate"></span></div>
-        <strong id="pName" style="font-size: 1.3em;"></strong><br>
+        <div style="float:right; text-align:right;"><strong>QUOTE DATE:</strong> <span id="quoteDate"></span></div>
+        <strong id="pName" style="font-size: 1.4em;"></strong><br>
         <span id="pAddr"></span><br>
         <span id="pPhone"></span> | <span id="pEmail"></span>
     </div>
@@ -68,18 +68,21 @@
         <div class="card">
             <span class="card-title">1. Customer & Sourcing</span>
             <div class="grid">
-                <input type="text" id="custName" placeholder="Customer Name" oninput="syncPrint()">
+                <input type="text" id="custName" placeholder="Full Name" oninput="syncPrint()">
                 <input type="text" id="custPhone" placeholder="Phone Number" oninput="syncPrint()">
             </div>
             <div class="grid" style="margin-top:10px;">
-                <input type="text" id="custEmail" placeholder="Email" oninput="syncPrint()">
-                <input type="text" id="custAddr" placeholder="Address" oninput="syncPrint()">
+                <input type="text" id="custEmail" placeholder="Email Address" oninput="syncPrint()">
+                <input type="text" id="custAddr" placeholder="Physical Address" oninput="syncPrint()">
             </div>
             <div class="grid" style="margin-top:10px;">
-                <select id="sourcing"><option value="shop">Shop Provides Blank</option><option value="cust">Customer Provides Blank</option></select>
+                <select id="sourcing">
+                    <option value="shop">Shop Provides Blank</option>
+                    <option value="cust">Customer Provides Blank</option>
+                </select>
                 <button class="btn-sync" onclick="fetchAllData()">🔄 Sync All Shop Data</button>
             </div>
-            <div id="sync-status" style="text-align:center; font-size:11px; margin-top:5px;">Ready</div>
+            <div id="sync-status" style="text-align:center; font-size:11px; margin-top:5px; font-weight:bold;">Status: Ready</div>
         </div>
 
         <div class="card">
@@ -99,12 +102,12 @@
 
             <div id="blankRow" class="grid" style="margin-top:15px;">
                 <div><label>Blank Item</label><select id="blankSelect"><option value="">-- Sync First --</option></select></div>
-                <div><label>Item Size/Detail</label><input type="text" id="itemSize" placeholder="XL, Hat, etc."></div>
+                <div><label>Size / Detail</label><input type="text" id="itemSize" placeholder="XL, Hat, etc."></div>
             </div>
 
             <div id="decoRow" class="grid" style="margin-top:15px;">
-                <div><label>Transfer / Decoration</label><select id="transferSelect"><option value="">-- Sync First --</option></select></div>
-                <div><label>Dimensions (WxH inches)</label>
+                <div><label>Decoration / Material</label><select id="transferSelect"><option value="">-- Sync First --</option></select></div>
+                <div><label>Dimensions (WxH)</label>
                     <div style="display:flex; gap:5px;"><input type="number" id="w" placeholder="W" step="0.1"><input type="number" id="h" placeholder="H" step="0.1"></div>
                 </div>
             </div>
@@ -119,7 +122,7 @@
                 <div id="manualFeeBox" style="display:none;"><label>Confirmed Fee ($)</label><input type="number" id="manualFee" value="0.00" step="0.01"></div>
             </div>
 
-            <button class="btn-add" id="mainActionButton" onclick="handleMainAction()">➕ Add Compound Item to Quote</button>
+            <button class="btn-add" id="mainActionButton" onclick="handleMainAction()">➕ Add Item to Quote</button>
         </div>
     </div>
 
@@ -127,15 +130,15 @@
         <div class="card">
             <span class="card-title no-print">3. Quote Summary</span>
             <table id="quoteTable">
-                <thead><tr><th style="width:60%">Description</th><th style="width:10%">Qty</th><th style="width:15%">Total</th><th class="no-print" style="width:15%">Edit/X</th></tr></thead>
+                <thead><tr><th style="width:55%">Description</th><th style="width:10%">Qty</th><th style="width:15%">Total</th><th class="no-print" style="width:20%">Edit/X</th></tr></thead>
                 <tbody id="quoteBody"></tbody>
             </table>
 
             <div class="adj-box no-print">
                 <div class="grid">
-                    <div><strong>Discount %</strong> <input type="number" id="manualDiscount" value="0" oninput="renderQuote()"></div>
+                    <div><strong>Manual Discount %</strong> <input type="number" id="manualDiscount" value="0" oninput="renderQuote()"></div>
                     <div>
-                        <input type="checkbox" id="applyTax" onchange="renderQuote()"> <strong>Tax %</strong>
+                        <input type="checkbox" id="applyTax" onchange="renderQuote()"> <strong>Apply Tax %</strong>
                         <input type="number" id="taxOverride" value="7.5" step="0.1" oninput="renderQuote()">
                     </div>
                 </div>
@@ -148,7 +151,7 @@
             </div>
 
             <div id="printTerms">
-                <strong>TERMS:</strong> 50% deposit required. No returns on custom items. Payment confirms approval.
+                <strong>TERMS:</strong> 50% deposit required on custom orders. No returns on customized items. Final payment confirms approval of design and quantity.
             </div>
 
             <div class="grid no-print" style="margin-top:20px;">
@@ -167,12 +170,14 @@ const urls = { blanks: base, settings: base + "&gid=1511041891&single=true", fee
 const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94BxLsUcKHa8uN9hC6UqxjB8r6ZeBfg/viewform";
 
 async function fetchAllData() {
+    document.getElementById('sync-status').innerText = "⌛ Syncing...";
     try {
         const [b, s, f, t] = await Promise.all(Object.values(urls).map(url => fetch(proxy + encodeURIComponent(url)).then(r => r.text())));
-        blanks = b.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
-        transfers = t.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
-        fees = f.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
-        s.split('\n').forEach(r => { const c = r.split(','); shopRates[c[0].trim()] = parseFloat(c[1]); });
+        blanks = b.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: (c[0]||"").replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
+        transfers = t.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: (c[0]||"").replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
+        fees = f.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: (c[0]||"").replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
+        s.split('\n').forEach(r => { const c = r.split(','); if(c[0]) shopRates[c[0].trim()] = parseFloat(c[1]) || 0; });
+        
         fillSelect('blankSelect', blanks); fillSelect('transferSelect', transfers); fillSelect('feeSelect', fees);
         document.getElementById('quoteDate').innerText = new Date().toLocaleDateString();
         document.getElementById('sync-status').innerText = "✅ Ready";
@@ -200,7 +205,7 @@ function updateUI() {
 
 function applyFee() {
     const fIdx = document.getElementById('feeSelect').value;
-    if (fIdx !== "0") { document.getElementById('manualFeeBox').style.display = 'block'; document.getElementById('manualFee').value = fees[fIdx].p; }
+    if (fIdx !== "0" && fIdx !== "") { document.getElementById('manualFeeBox').style.display = 'block'; document.getElementById('manualFee').value = fees[fIdx].p; }
     else { document.getElementById('manualFeeBox').style.display = 'none'; }
 }
 
@@ -214,23 +219,23 @@ function calculateCost() {
     const pressPower = ((shopRates.Press_Watts || 1500) / 1000) * kwRate;
     const pressRate = (shopRates.Press_Rate || 0);
 
-    let mat = 0;
+    let matTotal = 0;
     if (p !== 'press_only') {
         const bIdx = document.getElementById('blankSelect').value, tIdx = document.getElementById('transferSelect').value;
         const bCost = (document.getElementById('sourcing').value === 'shop' && bIdx !== "") ? blanks[bIdx].p : 0;
         const w = parseFloat(document.getElementById('w').value) || 0, h = parseFloat(document.getElementById('h').value) || 0;
         const tCost = (tIdx !== "") ? (w * h * transfers[tIdx].p) : 0;
-        mat = (bCost + tCost) * markup * q;
+        matTotal = (bCost + tCost) * markup * q;
     }
 
-    let labor = 0;
-    if (p.includes('dtf') || p === 'transfer_only') labor += (15 * (printLabor + printerRate + printerPower));
-    if (p === 'dtf_full' || p === 'press_only' || p === 'hybrid') labor += (6 * q * (laborMin + pressPower + pressRate));
+    let laborTotal = 0;
+    if (p.includes('dtf') || p === 'transfer_only') laborTotal += (15 * (printLabor + printerRate + printerPower));
+    if (p === 'dtf_full' || p === 'press_only' || p === 'hybrid') laborTotal += (6 * q * (laborMin + pressPower + pressRate));
     if (p === 'laser' || p === 'hybrid') {
         const lRate = (document.getElementById('laserModule').value === '40w' ? shopRates.Diode_Rate : shopRates.IR_Rate) || 0;
-        labor += (parseFloat(document.getElementById('laserMins').value) || 0) * (laborMin + lRate);
+        laborTotal += (parseFloat(document.getElementById('laserMins').value) || 0) * (laborMin + lRate);
     }
-    return mat + labor;
+    return matTotal + laborTotal;
 }
 
 function handleMainAction() {
@@ -239,17 +244,23 @@ function handleMainAction() {
     let desc = "";
     if (p === 'press_only') desc = "Heat Press Labor Only (Customer Blank)";
     else {
-        if (bIdx !== "") desc += blanks[bIdx].n + (size ? ` [${size}]` : "");
-        if (tIdx !== "") desc += ` w/ ${document.getElementById('w').value}x${document.getElementById('h').value} ${transfers[tIdx].n}`;
+        if (bIdx !== "" && blanks[bIdx]) desc += blanks[bIdx].n + (size ? ` [${size}]` : "");
+        if (tIdx !== "" && transfers[tIdx]) desc += (desc ? " w/ " : "") + `${document.getElementById('w').value}x${document.getElementById('h').value} ${transfers[tIdx].n}`;
     }
+    if(!desc) desc = "Custom Job";
+
     const itemData = { desc, qty: q, total: calculateCost(),
         raw: { p, q, bIdx, tIdx, size, w: document.getElementById('w').value, h: document.getElementById('h').value, lM: document.getElementById('laserModule').value, lT: document.getElementById('laserMins').value }
     };
+
     if (editingIndex === -1) { quoteItems.push(itemData); } 
-    else { quoteItems[editingIndex] = itemData; editingIndex = -1; document.getElementById('mainActionButton').innerHTML = "➕ Add Compound Item"; }
-    
+    else { quoteItems[editingIndex] = itemData; editingIndex = -1; document.getElementById('mainActionButton').innerHTML = "➕ Add Item to Quote"; }
+
     const fIdx = document.getElementById('feeSelect').value;
-    if (fIdx !== "0") { quoteItems.push({ desc: `Fee: ${fees[fIdx].n}`, qty: 1, total: parseFloat(document.getElementById('manualFee').value) || 0, raw: null }); document.getElementById('feeSelect').value = "0"; applyFee(); }
+    if (fIdx !== "0" && fIdx !== "") { 
+        quoteItems.push({ desc: `Fee: ${fees[fIdx].n}`, qty: 1, total: parseFloat(document.getElementById('manualFee').value) || 0, raw: null }); 
+        document.getElementById('feeSelect').value = "0"; applyFee(); 
+    }
     renderQuote();
 }
 
@@ -261,8 +272,7 @@ function renderQuote() {
         body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print">${editBtn}<button class="btn-remove" onclick="removeItem(${index})">X</button></td></tr>`; 
     });
     const disc = parseFloat(document.getElementById('manualDiscount').value) || 0, runningSub = subTotal * (1 - disc / 100);
-    let taxAmt = 0; const tRate = parseFloat(document.getElementById('taxOverride').value) / 100;
-    if (document.getElementById('applyTax').checked) taxAmt = runningSub * tRate;
+    let taxAmt = 0; if (document.getElementById('applyTax').checked) taxAmt = runningSub * (parseFloat(document.getElementById('taxOverride').value) / 100);
     document.getElementById('disc-line').innerText = disc > 0 ? `Discount: -$${(subTotal * disc / 100).toFixed(2)}` : "";
     document.getElementById('tax-line').innerText = taxAmt > 0 ? `Tax: +$${taxAmt.toFixed(2)}` : "";
     document.getElementById('grandTotal').innerText = (runningSub + taxAmt).toFixed(2);
@@ -270,7 +280,7 @@ function renderQuote() {
 }
 
 function editItem(index) {
-    const itm = quoteItems[index].raw; editingIndex = index;
+    const itm = quoteItems[index].raw; if(!itm) return; editingIndex = index;
     document.getElementById('process').value = itm.p; document.getElementById('qty').value = itm.q;
     document.getElementById('blankSelect').value = itm.bIdx; document.getElementById('itemSize').value = itm.size;
     document.getElementById('transferSelect').value = itm.tIdx; document.getElementById('w').value = itm.w;
@@ -280,7 +290,6 @@ function editItem(index) {
 }
 
 function removeItem(index) { quoteItems.splice(index, 1); renderQuote(); }
-function startNewQuote() { if(confirm("Start fresh?")) { quoteItems = []; renderQuote(); } }
 function recordQuote() {
     const ids = { item: "entry.1633428776", qty: "entry.892135426", total: "entry.920745966" };
     const url = `${formUrl}?usp=pp_url&${ids.item}=${encodeURIComponent(quoteItems.map(i => i.desc).join(" | "))}&${ids.qty}=${encodeURIComponent(quoteItems.map(i => i.qty).join(", "))}&${ids.total}=${encodeURIComponent(document.getElementById('grandTotal').innerText)}`;
