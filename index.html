@@ -8,25 +8,22 @@
         body { font-family: 'Segoe UI', sans-serif; background: #333; padding: 20px; color: #333; }
         .container { max-width: 850px; margin: auto; background: #eee; padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border-top: 10px solid #d32f2f; }
         .logo-text { font-size: 28px; text-transform: uppercase; font-weight: 800; text-align: center; display: block; margin-bottom: 20px; color: #111; border-bottom: 2px solid #ccc; padding-bottom: 10px; }
-        
         .card { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
         .card-title { font-size: 0.85em; font-weight: 900; color: #d32f2f; text-transform: uppercase; margin-bottom: 15px; display: block; border-left: 5px solid #d32f2f; padding-left: 12px; }
-        
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         label { font-weight: bold; font-size: 0.85em; display: block; margin-bottom: 5px; color: #444; }
         input, select { width: 100%; padding: 12px; border: 1px solid #bbb; border-radius: 6px; box-sizing: border-box; font-size: 15px; background: #fafafa; }
-        
         button { cursor: pointer; font-weight: bold; text-transform: uppercase; border-radius: 6px; border: none; transition: 0.2s; }
         .btn-sync { background: #1976d2; color: white; padding: 10px 20px; font-size: 0.8em; border-bottom: 3px solid #0d47a1; }
         .btn-add { background: #d32f2f; color: white; padding: 18px; width: 100%; font-size: 1.1em; margin-top: 10px; border-bottom: 5px solid #b71c1c; }
-        .btn-edit { background: #1976d2; color: white; padding: 5px 10px; }
         .btn-remove { background: #c62828; color: white; padding: 5px 10px; }
-        
         .grand-total-box { font-size: 2.2em; text-align: center; padding: 25px; background: #fff9c4; border: 3px solid #fbc02d; border-radius: 10px; margin-top: 20px; }
-        
+        .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #90a4ae; }
+        #printHeader { display: none; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
         @media print {
-            .no-print, button, .card-title { display: none !important; }
+            .no-print, button, .card-title, .adj-box { display: none !important; }
             .container { box-shadow: none !important; border: none !important; width: 100% !important; background: white !important; }
+            #printHeader { display: block !important; }
             th:last-child, td:last-child { display: none !important; }
         }
     </style>
@@ -36,15 +33,28 @@
 <div class="container">
     <div class="logo-text">4 Zero 2 Creations</div>
 
+    <div id="printHeader">
+        <div style="float:right; text-align:right;"><strong>DATE:</strong> <span id="quoteDate"></span></div>
+        <strong id="pName" style="font-size: 1.3em;"></strong><br>
+        <span id="pAddr"></span><br>
+        <span id="pPhone"></span> | <span id="pEmail"></span>
+    </div>
+
     <div class="no-print">
         <div class="card">
             <span class="card-title">1. Customer & Sourcing</span>
             <div class="grid">
-                <input type="text" id="custName" placeholder="Customer Name">
-                <select id="sourcing"><option value="shop">Shop Provides Blank</option><option value="cust">Customer Provides Blank</option></select>
+                <input type="text" id="custName" placeholder="Customer Name" oninput="syncPrint()">
+                <input type="text" id="custPhone" placeholder="Phone Number" oninput="syncPrint()">
             </div>
-            <button class="btn-sync" style="margin-top:15px;" onclick="fetchAllData()">🔄 Sync All Shop Data</button>
-            <div id="sync-status" style="text-align:center; font-size:11px; margin-top:5px;">Ready</div>
+            <div class="grid" style="margin-top:10px;">
+                <input type="text" id="custEmail" placeholder="Email" oninput="syncPrint()">
+                <input type="text" id="custAddr" placeholder="Address" oninput="syncPrint()">
+            </div>
+            <div class="grid" style="margin-top:10px;">
+                <select id="sourcing"><option value="shop">Shop Provides Blank</option><option value="cust">Customer Provides Blank</option></select>
+                <button class="btn-sync" onclick="fetchAllData()">🔄 Sync Shop Data</button>
+            </div>
         </div>
 
         <div class="card">
@@ -52,9 +62,9 @@
             <div class="grid">
                 <div><label>Process Type</label>
                     <select id="process" onchange="updateUI()">
-                        <option value="dtf_full">Full DTF Service (Standard Order)</option>
-                        <option value="press_only">Heat Press ONLY (Customer Provided)</option>
-                        <option value="transfer_only">Transfer ONLY (Film Sale)</option>
+                        <option value="dtf_full">Full DTF Service</option>
+                        <option value="press_only">Heat Press ONLY</option>
+                        <option value="transfer_only">Transfer ONLY</option>
                         <option value="laser">Laser Only</option>
                         <option value="hybrid">Hybrid (Laser Patch + Press)</option>
                     </select>
@@ -62,28 +72,25 @@
                 <div><label>Quantity</label><input type="number" id="qty" value="1"></div>
             </div>
 
-            <div id="blankRow" style="margin-top:15px;">
-                <label>Select Blank (Shirt/Hoodie/Hat)</label>
-                <div class="grid">
-                    <select id="blankSelect"><option value="">-- Select --</option></select>
-                    <input type="text" id="itemSize" placeholder="Size (XL, etc.)">
-                </div>
+            <div id="blankRow" class="grid" style="margin-top:15px;">
+                <div><label>Blank Item</label><select id="blankSelect"><option value="">-- Sync First --</option></select></div>
+                <div><label>Size / Details</label><input type="text" id="itemSize" placeholder="XL, Hat, etc."></div>
             </div>
 
-            <div id="decoRow" style="margin-top:15px;">
-                <label>Decoration (Transfer/Material)</label>
-                <div class="grid">
-                    <select id="transferSelect"><option value="">-- Select --</option></select>
+            <div id="decoRow" class="grid" style="margin-top:15px;">
+                <div><label>Material</label><select id="transferSelect"><option value="">-- Sync First --</option></select></div>
+                <div><label>Width x Height (Inches)</label>
                     <div style="display:flex; gap:5px;"><input type="number" id="w" placeholder="W" step="0.1"><input type="number" id="h" placeholder="H" step="0.1"></div>
                 </div>
             </div>
 
-            <div id="laserRow" style="margin-top:15px; display:none;">
-                <label>Laser Settings</label>
-                <div class="grid">
-                    <select id="laserModule"><option value="40w">40W Diode</option><option value="2w">2W IR</option></select>
-                    <input type="number" id="laserMins" placeholder="Run Mins">
-                </div>
+            <div id="laserRow" class="grid" style="margin-top:15px; display:none;">
+                <div><label>Laser Module</label><select id="laserModule"><option value="40w">40W Diode</option><option value="2w">2W IR</option></select></div>
+                <div><label>Laser Time (Mins)</label><input type="number" id="laserMins" value="10"></div>
+            </div>
+
+            <div class="grid" style="margin-top:15px;">
+                <div><label>Optional Prep Fee</label><select id="feeSelect"><option value="">-- None --</option></select></div>
             </div>
 
             <button class="btn-add" onclick="handleMainAction()">➕ Add to Quote</button>
@@ -96,27 +103,47 @@
                 <thead><tr><th>Description</th><th>Qty</th><th>Total</th><th class="no-print">X</th></tr></thead>
                 <tbody id="quoteBody"></tbody>
             </table>
-            <div class="grand-total-box"><strong>TOTAL: $<span id="grandTotal">0.00</span></strong></div>
-            <div class="no-print" style="margin-top:15px;"><button onclick="window.print()">🖨️ Print Quote</button></div>
+
+            <div class="adj-box no-print">
+                <div class="grid">
+                    <div><strong>Discount %</strong> <input type="number" id="manualDiscount" value="0" oninput="renderQuote()"></div>
+                    <div>
+                        <input type="checkbox" id="applyTax" onchange="renderQuote()"> <strong>Tax %</strong>
+                        <input type="number" id="taxOverride" value="7.5" step="0.1" oninput="renderQuote()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grand-total-box">
+                <div id="disc-line" style="color: #d32f2f; font-size: 0.5em;"></div>
+                <div id="tax-line" style="font-size: 0.5em; color: #455a64;"></div>
+                <strong>TOTAL: $<span id="grandTotal">0.00</span></strong>
+            </div>
+            <div class="grid no-print" style="margin-top:20px;">
+                <button style="background:#546e7a; color:white;" onclick="window.print()">🖨️ Print Quote</button>
+                <button style="background:#ff9800; color:white;" onclick="recordQuote()">💾 Record Order</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-let blanks = [], transfers = [], shopRates = {}, quoteItems = [];
+let blanks = [], transfers = [], fees = [], shopRates = {}, quoteItems = [];
 const proxy = "https://corsproxy.io/?";
 const base = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?output=csv";
-const urls = { blanks: base, settings: base + "&gid=1511041891&single=true", transfers: base + "&gid=1573687412&single=true" };
+const urls = { blanks: base, settings: base + "&gid=1511041891&single=true", fees: base + "&gid=413242066&single=true", transfers: base + "&gid=1573687412&single=true" };
+const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94BxLsUcKHa8uN9hC6UqxjB8r6ZeBfg/viewform";
 
 async function fetchAllData() {
     try {
-        const [b, s, t] = await Promise.all(Object.values(urls).map(url => fetch(proxy + encodeURIComponent(url)).then(r => r.text())));
+        const [b, s, f, t] = await Promise.all(Object.values(urls).map(url => fetch(proxy + encodeURIComponent(url)).then(r => r.text())));
         blanks = b.split('\n').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
         transfers = t.split('\n').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
+        fees = f.split('\n').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
         s.split('\n').forEach(r => { const c = r.split(','); shopRates[c[0].trim()] = parseFloat(c[1]); });
-        fillSelect('blankSelect', blanks); fillSelect('transferSelect', transfers);
-        document.getElementById('sync-status').innerText = "✅ Data Ready";
-    } catch (e) { alert("Sync Failed!"); }
+        fillSelect('blankSelect', blanks); fillSelect('transferSelect', transfers); fillSelect('feeSelect', fees);
+        document.getElementById('quoteDate').innerText = new Date().toLocaleDateString();
+    } catch (e) { alert("Sync Error!"); }
 }
 
 function fillSelect(id, data) {
@@ -124,61 +151,80 @@ function fillSelect(id, data) {
     data.forEach((item, i) => { const o = document.createElement('option'); o.value = i; o.text = `${item.n} ($${item.p})`; s.add(o); });
 }
 
+function syncPrint() {
+    document.getElementById('pName').innerText = document.getElementById('custName').value;
+    document.getElementById('pPhone').innerText = document.getElementById('custPhone').value;
+    document.getElementById('pEmail').innerText = document.getElementById('custEmail').value;
+    document.getElementById('pAddr').innerText = document.getElementById('custAddr').value;
+}
+
 function updateUI() {
     const p = document.getElementById('process').value;
-    document.getElementById('blankRow').style.display = (p === 'transfer_only' || p === 'laser') ? 'none' : 'block';
-    document.getElementById('decoRow').style.display = (p === 'press_only') ? 'none' : 'block';
-    document.getElementById('laserRow').style.display = (p === 'laser' || p === 'hybrid') ? 'block' : 'none';
+    document.getElementById('blankRow').style.display = (p === 'transfer_only' || p === 'laser') ? 'none' : 'grid';
+    document.getElementById('decoRow').style.display = (p === 'press_only') ? 'none' : 'grid';
+    document.getElementById('laserRow').style.display = (p === 'laser' || p === 'hybrid') ? 'grid' : 'none';
 }
 
 function calculateCost() {
     const p = document.getElementById('process').value, q = parseInt(document.getElementById('qty').value) || 1;
     const markup = shopRates.Markup || 1, laborMin = (shopRates.Labor_Rate || 30) / 60;
-    const printerRate = (shopRates.Printer_Rate || 0) / 60;
-    const kwRate = 0.12 / 60; // Assumed $0.12/kWh converted to per minute
-    const pressPower = ((shopRates.Press_Watts || 1500) / 1000) * kwRate;
-    const pressWear = shopRates.Press_Rate || 0; // $/min for wear
-    
-    let mat = 0;
+    const printerRate = (shopRates.Printer_Rate || 0) / 60, pressRate = (shopRates.Press_Rate || 0);
+    const kwRate = 0.12 / 60, pressPower = ((shopRates.Press_Watts || 1500) / 1000) * kwRate;
+    let material = 0;
     if (p !== 'press_only') {
         const bIdx = document.getElementById('blankSelect').value, tIdx = document.getElementById('transferSelect').value;
         const bCost = (document.getElementById('sourcing').value === 'shop' && bIdx !== "") ? blanks[bIdx].p : 0;
         const w = parseFloat(document.getElementById('w').value) || 0, h = parseFloat(document.getElementById('h').value) || 0;
         const tCost = (tIdx !== "") ? (w * h * transfers[tIdx].p) : 0;
-        mat = (bCost + tCost) * markup * q;
+        material = (bCost + tCost) * markup * q;
     }
-
     let labor = 0;
     if (p.includes('dtf') || p === 'transfer_only') labor += (15 * (laborMin + printerRate));
-    if (p === 'dtf_full' || p === 'press_only' || p === 'hybrid') labor += (6 * q * (laborMin + pressPower + pressWear));
+    if (p === 'dtf_full' || p === 'press_only' || p === 'hybrid') labor += (6 * q * (laborMin + pressPower + pressRate));
     if (p === 'laser' || p === 'hybrid') {
         const lRate = (document.getElementById('laserModule').value === '40w' ? shopRates.Diode_Rate : shopRates.IR_Rate) || 0;
         labor += (parseFloat(document.getElementById('laserMins').value) || 0) * (laborMin + lRate);
     }
-    return mat + labor;
+    return material + labor;
 }
 
 function handleMainAction() {
-    const p = document.getElementById('process').value, bIdx = document.getElementById('blankSelect').value;
-    const tIdx = document.getElementById('transferSelect').value, size = document.getElementById('itemSize').value;
+    const p = document.getElementById('process').value, q = document.getElementById('qty').value;
+    const bIdx = document.getElementById('blankSelect').value, tIdx = document.getElementById('transferSelect').value;
     let desc = "";
-    if (p === 'press_only') desc = "Heat Press Labor (Customer Provided)";
+    if (p === 'press_only') desc = "Heat Press Labor Only";
     else {
-        if (bIdx !== "") desc += blanks[bIdx].n + (size ? ` [${size}]` : "");
-        if (tIdx !== "") desc += ` w/ ${document.getElementById('w').value}x${document.getElementById('h').value} ${transfers[tIdx].n}`;
+        if (bIdx !== "") desc += blanks[bIdx].n + ` [${document.getElementById('itemSize').value}] `;
+        if (tIdx !== "") desc += `w/ ${document.getElementById('w').value}x${document.getElementById('h').value} ${transfers[tIdx].n}`;
     }
-    quoteItems.push({ desc, qty: document.getElementById('qty').value, total: calculateCost() });
+    quoteItems.push({ desc: desc || "Custom Item", qty: q, total: calculateCost() });
+    
+    // Add Fee if selected
+    const fIdx = document.getElementById('feeSelect').value;
+    if (fIdx !== "") {
+        quoteItems.push({ desc: `Fee: ${fees[fIdx].n}`, qty: 1, total: fees[fIdx].p });
+        document.getElementById('feeSelect').value = ""; 
+    }
     renderQuote();
 }
 
 function renderQuote() {
-    const body = document.getElementById('quoteBody'); body.innerHTML = ""; let grand = 0;
-    quoteItems.forEach((item, i) => { grand += item.total; body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print"><button onclick="remove(${i})" class="btn-remove">X</button></td></tr>`; });
-    document.getElementById('grandTotal').innerText = grand.toFixed(2);
+    const body = document.getElementById('quoteBody'); body.innerHTML = ""; let sub = 0;
+    quoteItems.forEach((item, i) => { sub += item.total; body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print"><button onclick="remove(${i})" class="btn-remove">X</button></td></tr>`; });
+    const disc = parseFloat(document.getElementById('manualDiscount').value) || 0, running = sub * (1 - disc / 100);
+    let tax = 0; if (document.getElementById('applyTax').checked) tax = running * (parseFloat(document.getElementById('taxOverride').value) / 100);
+    document.getElementById('disc-line').innerText = disc > 0 ? `Discount: -$${(sub * disc / 100).toFixed(2)}` : "";
+    document.getElementById('tax-line').innerText = tax > 0 ? `Tax: +$${tax.toFixed(2)}` : "";
+    document.getElementById('grandTotal').innerText = (running + tax).toFixed(2);
     document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
 }
 
 function remove(i) { quoteItems.splice(i, 1); renderQuote(); }
+function recordQuote() {
+    const ids = { item: "entry.1633428776", qty: "entry.892135426", total: "entry.920745966" };
+    const url = `${formUrl}?usp=pp_url&${ids.item}=${encodeURIComponent(quoteItems.map(i => i.desc).join(" | "))}&${ids.qty}=${encodeURIComponent(quoteItems.map(i => i.qty).join(", "))}&${ids.total}=${encodeURIComponent(document.getElementById('grandTotal').innerText)}`;
+    window.open(url, '_blank');
+}
 window.onload = fetchAllData;
 </script>
 </body>
