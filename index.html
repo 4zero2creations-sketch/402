@@ -30,10 +30,24 @@
         #printTerms { display: none; margin-top: 30px; font-size: 10px; color: #555; border-top: 1px solid #ccc; padding-top: 10px; }
 
         @media print {
-            .no-print, button, .section-label, label, input, select, textarea, .btn-add, .adj-box { display: none !important; }
-            #printTerms { display: block !important; }
-            .container { box-shadow: none !important; border: none !important; width: 100% !important; background: white !important; }
-            table th:last-child, table td:last-child { display: none !important; }
+            @page { margin: 0.5in; }
+            body { background: white !important; padding: 0 !important; margin: 0 !important; }
+            .container { 
+                box-shadow: none !important; 
+                border: none !important; 
+                width: 100% !important; 
+                max-width: 100% !important; 
+                margin: 0 !important; 
+                padding: 10px !important; 
+                background: white !important; 
+            }
+            .no-print, button, .section-label, label, input, select, textarea, .btn-add, .adj-box, #sync-status { display: none !important; }
+            #printTerms { display: block !important; width: 100% !important; }
+            table { width: 100% !important; table-layout: fixed !important; border: 1px solid #333 !important; }
+            th { background: #f0f0f0 !important; color: black !important; border-bottom: 2px solid #333 !important; }
+            td { border-bottom: 1px solid #999 !important; color: black !important; }
+            table th:last-child, table td:last-child { display: none !important; } /* Hide Edit/X column */
+            .grand-total-box { border: 2px solid black !important; background: white !important; color: black !important; width: 95% !important; margin: 20px auto !important; }
         }
     </style>
 </head>
