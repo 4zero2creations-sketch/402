@@ -56,12 +56,12 @@
 
     <div class="no-print">
         <div class="grid">
-            <button class="btn-sync" onclick="fetchAllData()">🔄 Sync All Tabs</button>
+            <button class="btn-sync" onclick="fetchAllData()">🔄 Sync Shop Data</button>
             <button style="background:#607d8b; color:white;" onclick="startNewQuote()">✨ New Quote</button>
         </div>
         <div id="sync-status" style="text-align:center; font-size:12px; font-weight:bold; margin-top:5px;">Status: Ready</div>
 
-        <span class="section-label">1. Customer Details</span>
+        <span class="section-label">1. Customer & Sourcing</span>
         <div class="grid">
             <input type="text" id="custName" placeholder="Customer Name" oninput="updatePrintInfo()">
             <input type="text" id="custPhone" placeholder="Phone Number" oninput="updatePrintInfo()">
@@ -70,39 +70,51 @@
             <input type="text" id="custEmail" placeholder="Email Address" oninput="updatePrintInfo()">
             <input type="text" id="custAddr" placeholder="Physical Address" oninput="updatePrintInfo()">
         </div>
-
-        <span class="section-label">2. Build Your Product</span>
-        <div class="grid">
-            <div><label>Process Type</label>
-                <select id="process" onchange="toggleInputs()">
-                    <option value="dtf_full">Full DTF Service (Blank + Print)</option>
-                    <option value="press_only">Heat Press ONLY (Customer Supplied)</option>
-                    <option value="transfer_only">Transfer ONLY (No Blank)</option>
-                    <option value="laser">Laser Only</option>
-                </select>
+        <div class="grid" style="margin-top:10px;">
+            <div><label>Job Sourcing</label>
+                <select id="sourcing"><option value="shop">Shop Provides Blank</option><option value="cust">Customer Provides Blank</option></select>
             </div>
             <div><label>Master Quantity</label><input type="number" id="qty" value="1"></div>
         </div>
 
-        <div id="blankSection" style="background:#cfd8dc; padding:15px; border-radius:8px; margin-top:10px;">
-            <div class="grid">
-                <div><label>Select Blank (Garment/Item)</label><select id="blankSelect"><option value="">-- Sync First --</option></select></div>
-                <div><label>Size / Details</label><input type="text" id="itemSize" placeholder="e.g. XL or Coaster"></div>
+        <span class="section-label">2. Build Your Product</span>
+        <div class="grid">
+            <div><label>Process Type</label>
+                <select id="process" onchange="toggleSections()">
+                    <option value="dtf_full">Full DTF Service (Blank + Print)</option>
+                    <option value="press_only">Heat Press ONLY (Customer Supplied)</option>
+                    <option value="transfer_only">Transfer ONLY (No Press)</option>
+                    <option value="laser">Laser Only (No Press)</option>
+                    <option value="hybrid">Hybrid (Laser Patch + Press)</option>
+                </select>
             </div>
+            <div><label>Size / Details</label><input type="text" id="itemSize" placeholder="e.g. XL or 20oz"></div>
+        </div>
+
+        <div id="blankSection" style="background:#cfd8dc; padding:15px; border-radius:8px; margin-top:10px;">
+            <label>Select Blank (from Blanks tab)</label>
+            <select id="blankSelect"><option value="">-- Sync First --</option></select>
         </div>
 
         <div id="decorationSection" style="background:#e8f5e9; padding:15px; border-radius:8px; margin-top:10px; border:1px solid #a5d6a7;">
             <div class="grid">
-                <div><label>Select Decoration (Transfer)</label><select id="transferSelect"><option value="">-- Sync First --</option></select></div>
-                <div><label>Setup / Processing Fee Guide</label><select id="feeSelect" onchange="applyFeeExample()"><option value="0">-- Optional Fee --</option></select></div>
+                <div><label>Decoration Material</label><select id="transferSelect"><option value="">-- Sync First --</option></select></div>
+                <div><label>Processing Fee Guide</label><select id="feeSelect" onchange="applyFee()"><option value="0">-- Optional --</option></select></div>
             </div>
             <div class="grid" style="margin-top:10px;">
-                <div><label>Width (in)</label><input type="number" id="w" value="0" step="0.1"></div>
-                <div><label>Height (in)</label><input type="number" id="h" value="0" step="0.1"></div>
+                <div><label>Dim Width (in)</label><input type="number" id="w" value="0" step="0.1"></div>
+                <div><label>Dim Height (in)</label><input type="number" id="h" value="0" step="0.1"></div>
             </div>
-            <div id="feeManualContainer" style="margin-top:10px; display:none;">
+            <div id="feeManualContainer" style="margin-top:10px; display:none; background:#fff3e0; padding:10px; border-radius:8px;">
                 <label>Confirmed Fee Amount ($)</label>
                 <input type="number" id="manualFee" value="0.00" step="0.01">
+            </div>
+        </div>
+
+        <div id="laserSection" style="display:none; background: #bbdefb; padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid #64b5f6;">
+            <div class="grid">
+                <div><label>Laser Module</label><select id="laserModule"><option value="40w">40W Diode</option><option value="2w">2W IR</option></select></div>
+                <div><label>Total Laser Time (Batch Mins)</label><input type="number" id="laserMins" value="10"></div>
             </div>
         </div>
 
@@ -147,12 +159,7 @@
 let blanks = [], transfers = [], fees = [], shopRates = {}, quoteItems = [], editingIndex = -1;
 const proxy = "https://corsproxy.io/?";
 const base = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?output=csv";
-const urls = {
-    blanks: base,
-    settings: base + "&gid=1511041891&single=true",
-    fees: base + "&gid=413242066&single=true",
-    transfers: base + "&gid=1573687412&single=true"
-};
+const urls = { blanks: base, settings: base + "&gid=1511041891&single=true", fees: base + "&gid=413242066&single=true", transfers: base + "&gid=1573687412&single=true" };
 const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94BxLsUcKHa8uN9hC6UqxjB8r6ZeBfg/viewform";
 
 async function fetchAllData() {
@@ -163,10 +170,7 @@ async function fetchAllData() {
         transfers = t.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, ""), p: parseFloat(c[1]) || 0 }; });
         fees = f.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, ""), p: parseFloat(c[1]) || 0 }; });
         s.split('\n').forEach(r => { const c = r.split(','); shopRates[c[0].trim()] = parseFloat(c[1]); });
-
-        populateSelect('blankSelect', blanks);
-        populateSelect('transferSelect', transfers);
-        populateSelect('feeSelect', fees);
+        populateSelect('blankSelect', blanks); populateSelect('transferSelect', transfers); populateSelect('feeSelect', fees);
         if (shopRates.Tax_Rate) document.getElementById('taxOverride').value = (shopRates.Tax_Rate * 100).toFixed(1);
         document.getElementById('quoteDate').innerText = new Date().toLocaleDateString();
         document.getElementById('sync-status').innerText = "✅ Ready";
@@ -185,70 +189,69 @@ function updatePrintInfo() {
     document.getElementById('printAddr').innerText = document.getElementById('custAddr').value;
 }
 
-function toggleInputs() {
+function toggleSections() {
     const p = document.getElementById('process').value;
-    document.getElementById('blankSection').style.display = p === 'transfer_only' || p === 'press_only' ? 'none' : 'block';
+    document.getElementById('blankSection').style.display = (p === 'transfer_only' || p === 'laser') ? 'none' : 'block';
+    document.getElementById('decorationSection').style.display = (p === 'press_only') ? 'none' : 'block';
+    document.getElementById('laserSection').style.display = (p === 'laser' || p === 'hybrid') ? 'block' : 'none';
 }
 
-function applyFeeExample() {
+function applyFee() {
     const fIdx = document.getElementById('feeSelect').value;
     if (fIdx !== "0") {
         document.getElementById('feeManualContainer').style.display = 'block';
         document.getElementById('manualFee').value = fees[fIdx].p;
-    } else {
-        document.getElementById('feeManualContainer').style.display = 'none';
-    }
+    } else { document.getElementById('feeManualContainer').style.display = 'none'; }
 }
 
 function calculateCompoundCost() {
-    const p = document.getElementById('process').value;
-    const q = parseInt(document.getElementById('qty').value) || 1;
-    const markup = shopRates.Markup || 1;
-    const laborMinRate = (shopRates.Labor_Rate || 30) / 60;
+    const p = document.getElementById('process').value, q = parseInt(document.getElementById('qty').value) || 1;
+    const markup = shopRates.Markup || 1, laborMin = (shopRates.Labor_Rate || 30) / 60;
+    const printerRate = (shopRates.Printer_Rate || 0) / 60, pressRate = (shopRates.Press_Rate || 0) / 60;
     
-    let costPerUnit = 0;
-    
+    let materialCost = 0;
     if (p !== 'press_only') {
-        const bIdx = document.getElementById('blankSelect').value;
-        const tIdx = document.getElementById('transferSelect').value;
-        const w = parseFloat(document.getElementById('w').value) || 0;
-        const h = parseFloat(document.getElementById('h').value) || 0;
-
-        if (bIdx !== "" && p !== 'transfer_only') costPerUnit += blanks[bIdx].p * markup;
-        if (tIdx !== "") costPerUnit += (w * h) * transfers[tIdx].p * markup;
+        const bIdx = document.getElementById('blankSelect').value, tIdx = document.getElementById('transferSelect').value;
+        const bCost = (document.getElementById('sourcing').value === 'shop' && bIdx !== "") ? blanks[bIdx].p : 0;
+        const w = parseFloat(document.getElementById('w').value) || 0, h = parseFloat(document.getElementById('h').value) || 0;
+        const tCost = (tIdx !== "") ? (w * h * transfers[tIdx].p) : 0;
+        materialCost = (bCost + tCost) * markup * q;
     }
-    
-    if (p !== 'transfer_only') costPerUnit += (laborMinRate * 6); // 6 mins labor per item
 
-    return costPerUnit * q;
+    let laborCost = 0;
+    if (p.includes('dtf') || p === 'transfer_only') laborCost += (15 * (laborMin + printerRate));
+    if (p === 'dtf_full' || p === 'press_only' || p === 'hybrid') laborCost += (6 * q * (laborMin + pressRate));
+    if (p === 'laser' || p === 'hybrid') {
+        const lRate = (document.getElementById('laserModule').value === '40w' ? shopRates.Diode_Rate : shopRates.IR_Rate) || 0;
+        laborCost += (parseFloat(document.getElementById('laserMins').value) || 0) * (laborMin + lRate);
+    }
+    return materialCost + laborCost;
 }
 
 function handleMainAction() {
-    const p = document.getElementById('process').value;
+    const p = document.getElementById('process').value, bIdx = document.getElementById('blankSelect').value;
+    const tIdx = document.getElementById('transferSelect').value, size = document.getElementById('itemSize').value;
     const q = document.getElementById('qty').value;
-    const bIdx = document.getElementById('blankSelect').value;
-    const tIdx = document.getElementById('transferSelect').value;
-    const size = document.getElementById('itemSize').value;
     
     let desc = "";
-    if (p === 'press_only') desc = "Heat Press Labor Only (Customer Supplied)";
+    if (p === 'press_only') desc = "Press Labor Only (Customer Blank)";
     else {
-        if (bIdx !== "") desc += blanks[bIdx].n + (size ? ` [${size}] ` : " ");
-        if (tIdx !== "") desc += `w/ ${document.getElementById('w').value}x${document.getElementById('h').value} ${transfers[tIdx].n}`;
+        if (bIdx !== "") desc += blanks[bIdx].n + (size ? ` [${size}]` : "");
+        if (tIdx !== "") desc += ` w/ ${document.getElementById('w').value}x${document.getElementById('h').value} ${transfers[tIdx].n}`;
+        if (p === 'hybrid' || p === 'laser') desc += " (Laser Engraved)";
     }
 
-    const itemData = { desc: desc || "Custom Item", qty: q, total: calculateCompoundCost(),
-        raw: { p, q, bIdx, tIdx, size, w: document.getElementById('w').value, h: document.getElementById('h').value }
+    const itemData = { desc, qty: q, total: calculateCompoundCost(),
+        raw: { p, q, bIdx, tIdx, size, w: document.getElementById('w').value, h: document.getElementById('h').value, lM: document.getElementById('laserModule').value, lT: document.getElementById('laserMins').value }
     };
 
     if (editingIndex === -1) { quoteItems.push(itemData); } 
-    else { quoteItems[editingIndex] = itemData; editingIndex = -1; document.getElementById('mainActionButton').innerHTML = "➕ Add Compound Item"; document.getElementById('mainActionButton').classList.remove('btn-update-active'); }
+    else { quoteItems[editingIndex] = itemData; editingIndex = -1; document.getElementById('mainActionButton').innerHTML = "➕ Add Compound Item"; }
 
     const fIdx = document.getElementById('feeSelect').value;
     if (fIdx !== "0") {
-        const feeAmt = parseFloat(document.getElementById('manualFee').value) || 0;
-        quoteItems.push({ desc: `Processing: ${fees[fIdx].n}`, qty: 1, total: feeAmt, raw: null });
-        document.getElementById('feeSelect').value = "0"; applyFeeExample();
+        quoteItems.push({ desc: `Fee: ${fees[fIdx].n}`, qty: 1, total: parseFloat(document.getElementById('manualFee').value) || 0, raw: null });
+        document.getElementById('feeSelect').value = "0"; applyFee();
     }
     renderQuote();
 }
@@ -260,11 +263,11 @@ function renderQuote() {
         const editBtn = item.raw ? `<button class="btn-edit" onclick="editItem(${index})">✎</button>` : '';
         body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print">${editBtn}<button class="btn-remove" onclick="removeItem(${index})">X</button></td></tr>`; 
     });
-    const disc = parseFloat(document.getElementById('manualDiscount').value) || 0, discAmt = subTotal * (disc / 100), runningSub = subTotal - discAmt;
+    const disc = parseFloat(document.getElementById('manualDiscount').value) || 0, runningSub = subTotal * (1 - disc / 100);
     let taxAmt = 0; const tRate = parseFloat(document.getElementById('taxOverride').value) / 100;
     if (document.getElementById('applyTax').checked) taxAmt = runningSub * tRate;
-    document.getElementById('final-discount-line').innerText = disc > 0 ? `Discount (${disc}%): -$${discAmt.toFixed(2)}` : "";
-    document.getElementById('tax-line').innerText = taxAmt > 0 ? `Tax (${(tRate*100).toFixed(1)}%): +$${taxAmt.toFixed(2)}` : "";
+    document.getElementById('final-discount-line').innerText = disc > 0 ? `Discount (${disc}%): -$${(subTotal * disc / 100).toFixed(2)}` : "";
+    document.getElementById('tax-line').innerText = taxAmt > 0 ? `Tax (${(tRate * 100).toFixed(1)}%): +$${taxAmt.toFixed(2)}` : "";
     document.getElementById('grandTotal').innerText = (runningSub + taxAmt).toFixed(2);
     document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
 }
@@ -274,10 +277,9 @@ function editItem(index) {
     document.getElementById('process').value = itm.p; document.getElementById('qty').value = itm.q;
     document.getElementById('blankSelect').value = itm.bIdx; document.getElementById('itemSize').value = itm.size;
     document.getElementById('transferSelect').value = itm.tIdx; document.getElementById('w').value = itm.w;
-    document.getElementById('h').value = itm.h;
-    toggleInputs();
-    document.getElementById('mainActionButton').innerHTML = "✅ Update Compound Item"; document.getElementById('mainActionButton').classList.add('btn-update-active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('h').value = itm.h; document.getElementById('laserModule').value = itm.lM; document.getElementById('laserMins').value = itm.lT;
+    toggleSections();
+    document.getElementById('mainActionButton').innerHTML = "✅ Update Item";
 }
 
 function startNewQuote() { if(confirm("Clear current quote?")) { quoteItems = []; renderQuote(); } }
