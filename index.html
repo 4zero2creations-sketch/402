@@ -5,40 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4 Zero 2 Creations | Shop Master Pro</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #757575; padding: 20px; color: #333; }
-        .container { max-width: 850px; margin: auto; background: #e0e0e0; padding: 35px; border-radius: 15px; box-shadow: 0 4px 25px rgba(0,0,0,0.3); border-top: 10px solid #d32f2f; }
-        .logo-area { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #bdbdbd; padding-bottom: 15px; }
-        .logo-text { font-size: 24px; text-transform: uppercase; font-weight: bold; margin: 0; color: #212121; }
-        .section-label { background: #455a64; color: white; padding: 10px; font-weight: bold; margin-top: 25px; border-radius: 6px; display: block; text-align: center; font-size: 0.8em; text-transform: uppercase; }
-        label { font-weight: bold; display: block; margin-top: 15px; font-size: 0.85em; color: #424242; }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #9e9e9e; border-radius: 8px; box-sizing: border-box; font-size: 15px; background: #f5f5f5; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        button { width: 100%; padding: 14px; margin-top: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-sync { background: #1976d2; color: white; border-bottom: 4px solid #1565c0; }
-        .btn-add { background: #d32f2f; color: white; font-size: 18px; margin-top: 20px; border-bottom: 4px solid #b71c1c; }
-        .btn-update-active { background: #2e7d32 !important; color: white !important; }
-        .btn-remove, .btn-edit { padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; width: auto; display: inline-block; margin: 0 2px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #757575; padding: 20px; color: #333; line-height: 1.6; }
+        .container { max-width: 850px; margin: auto; background: #e0e0e0; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-top: 12px solid #d32f2f; }
+        .logo-area { text-align: center; margin-bottom: 25px; border-bottom: 3px double #bdbdbd; padding-bottom: 20px; }
+        .logo-text { font-size: 28px; text-transform: uppercase; font-weight: 900; letter-spacing: 2px; margin: 0; color: #212121; }
+        .section-label { background: #455a64; color: white; padding: 12px; font-weight: bold; margin-top: 30px; border-radius: 8px; display: block; text-align: center; font-size: 0.9em; text-transform: uppercase; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+        label { font-weight: bold; display: block; margin-top: 18px; font-size: 0.9em; color: #37474f; }
+        input, select, textarea { width: 100%; padding: 14px; margin-top: 6px; border: 2px solid #9e9e9e; border-radius: 10px; box-sizing: border-box; font-size: 16px; background: #fafafa; transition: 0.3s; }
+        input:focus, select:focus { border-color: #d32f2f; outline: none; background: #fff; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        button { width: 100%; padding: 16px; margin-top: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 14px; }
+        .btn-sync { background: #1565c0; color: white; border-bottom: 5px solid #0d47a1; }
+        .btn-add { background: #d32f2f; color: white; font-size: 18px; margin-top: 25px; border-bottom: 5px solid #b71c1c; }
+        .btn-update-active { background: #2e7d32 !important; border-bottom-color: #1b5e20 !important; }
+        .btn-remove, .btn-edit { padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; border: none; width: auto; display: inline-block; margin: 0 4px; }
         .btn-edit { background: #1976d2; color: white; }
         .btn-remove { background: #c62828; color: white; }
-        .grand-total-box { font-size: 2em; background: #fff9c4; padding: 20px; border: 3px solid #fbc02d; text-align: center; border-radius: 12px; margin-top: 20px; }
-        .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; }
-        table { width: 100%; margin-top: 20px; border-collapse: collapse; background: #eee; border-radius: 8px; overflow: hidden; table-layout: fixed; }
-        th { background: #455a64; color: white; padding: 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #ccc; word-wrap: break-word; }
-        #custInfoSummary { display: none; margin-bottom: 20px; line-height: 1.4; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
-        #printTerms { display: none; margin-top: 30px; font-size: 10px; color: #555; border-top: 1px solid #ccc; padding-top: 10px; }
+        .grand-total-box { font-size: 2.2em; background: #fff9c4; padding: 25px; border: 4px solid #fbc02d; text-align: center; border-radius: 15px; margin-top: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .adj-box { background: #cfd8dc; padding: 20px; border-radius: 10px; margin-top: 20px; border: 1px solid #90a4ae; }
+        table { width: 100%; margin-top: 25px; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; table-layout: fixed; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        th { background: #455a64; color: white; padding: 15px; text-align: left; font-size: 0.85em; }
+        td { padding: 15px; border-bottom: 1px solid #eee; word-wrap: break-word; font-size: 0.95em; }
+        #custInfoSummary { display: none; margin-bottom: 25px; line-height: 1.6; border-bottom: 2px solid #333; padding-bottom: 20px; }
+        #printTerms { display: none; margin-top: 40px; font-size: 11px; color: #444; border-top: 2px solid #ccc; padding-top: 15px; font-style: italic; }
 
         @media print {
-            @page { margin: 0.5in; }
+            @page { margin: 0.6in; }
             body { background: white !important; padding: 0 !important; margin: 0 !important; }
-            .container { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 15px !important; background: white !important; }
+            .container { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; background: white !important; }
             .no-print, button, .section-label, label, input, select, textarea, .btn-add, .adj-box, #sync-status { display: none !important; }
             #custInfoSummary, #printTerms { display: block !important; width: 100% !important; }
-            table { width: 100% !important; table-layout: fixed !important; border: 1px solid #333 !important; }
-            th { background: #f0f0f0 !important; color: black !important; border-bottom: 2px solid #333 !important; }
-            td { border-bottom: 1px solid #999 !important; color: black !important; }
+            table { width: 100% !important; table-layout: fixed !important; border: 1px solid #000 !important; }
+            th { background: #eee !important; color: #000 !important; border-bottom: 2px solid #000 !important; }
+            td { border-bottom: 1px solid #ddd !important; color: #000 !important; }
             th:nth-child(4), td:nth-child(4) { display: none !important; }
-            .grand-total-box { border: 2px solid black !important; background: white !important; color: black !important; width: 95% !important; margin: 20px auto !important; }
+            .grand-total-box { border: 3px solid #000 !important; background: white !important; color: #000 !important; width: 98% !important; margin: 25px auto !important; }
         }
     </style>
 </head>
@@ -48,10 +49,10 @@
     <div class="logo-area"><p class="logo-text">4 Zero 2 Creations</p></div>
     
     <div id="custInfoSummary">
-        <strong id="printName"></strong><br>
+        <div style="float:right; text-align:right;"><strong>QUOTE DATE:</strong> <span id="quoteDate"></span></div>
+        <strong id="printName" style="font-size: 1.4em;"></strong><br>
         <span id="printAddr"></span><br>
-        <span id="printPhone"></span> | <span id="printEmail"></span><br>
-        <small>Date: <span id="quoteDate"></span></small>
+        <span id="printPhone"></span> | <span id="printEmail"></span>
     </div>
 
     <div class="no-print">
@@ -59,16 +60,16 @@
             <button class="btn-sync" onclick="fetchAllData()">🔄 Sync Shop Data</button>
             <button style="background:#607d8b; color:white;" onclick="startNewQuote()">✨ New Quote</button>
         </div>
-        <div id="sync-status" style="text-align:center; font-size:12px; font-weight:bold; margin-top:5px;">Status: Ready</div>
+        <div id="sync-status" style="text-align:center; font-size:12px; font-weight:bold; margin-top:8px;">Status: Ready</div>
 
         <span class="section-label">1. Customer & Sourcing</span>
         <div class="grid">
-            <input type="text" id="custName" placeholder="Customer Name" oninput="updatePrintInfo()">
+            <input type="text" id="custName" placeholder="Full Name" oninput="updatePrintInfo()">
             <input type="text" id="custPhone" placeholder="Phone Number" oninput="updatePrintInfo()">
         </div>
         <div class="grid" style="margin-top:10px;">
             <input type="text" id="custEmail" placeholder="Email Address" oninput="updatePrintInfo()">
-            <input type="text" id="custAddr" placeholder="Physical Address" oninput="updatePrintInfo()">
+            <input type="text" id="custAddr" placeholder="Shipping/Billing Address" oninput="updatePrintInfo()">
         </div>
         <div class="grid" style="margin-top:10px;">
             <div><label>Job Sourcing</label>
@@ -77,44 +78,44 @@
             <div><label>Master Quantity</label><input type="number" id="qty" value="1"></div>
         </div>
 
-        <span class="section-label">2. Build Your Product</span>
+        <span class="section-label">2. Build Compound Job</span>
         <div class="grid">
-            <div><label>Process Type</label>
+            <div><label>Process Path</label>
                 <select id="process" onchange="toggleSections()">
                     <option value="dtf_full">Full DTF Service (Blank + Print)</option>
-                    <option value="press_only">Heat Press ONLY (Customer Supplied)</option>
-                    <option value="transfer_only">Transfer ONLY (No Press)</option>
-                    <option value="laser">Laser Only (No Press)</option>
+                    <option value="press_only">Heat Press ONLY (Cst Blank + Cst Transfer)</option>
+                    <option value="transfer_only">Transfer ONLY (No Blank/No Press)</option>
+                    <option value="laser">Laser Only (Engrave/Cut)</option>
                     <option value="hybrid">Hybrid (Laser Patch + Press)</option>
                 </select>
             </div>
-            <div><label>Size / Details</label><input type="text" id="itemSize" placeholder="e.g. XL or 20oz"></div>
+            <div><label>Size / Details</label><input type="text" id="itemSize" placeholder="e.g. XL, Hat, 20oz"></div>
         </div>
 
-        <div id="blankSection" style="background:#cfd8dc; padding:15px; border-radius:8px; margin-top:10px;">
-            <label>Select Blank (from Blanks tab)</label>
+        <div id="blankSection" style="background:#cfd8dc; padding:20px; border-radius:10px; margin-top:15px; border: 1px solid #b0bec5;">
+            <label>Select Blank (from Catalog/Blanks)</label>
             <select id="blankSelect"><option value="">-- Sync First --</option></select>
         </div>
 
-        <div id="decorationSection" style="background:#e8f5e9; padding:15px; border-radius:8px; margin-top:10px; border:1px solid #a5d6a7;">
+        <div id="decorationSection" style="background:#e8f5e9; padding:20px; border-radius:10px; margin-top:15px; border:1px solid #a5d6a7;">
             <div class="grid">
-                <div><label>Decoration Material</label><select id="transferSelect"><option value="">-- Sync First --</option></select></div>
-                <div><label>Processing Fee Guide</label><select id="feeSelect" onchange="applyFee()"><option value="0">-- Optional --</option></select></div>
+                <div><label>Decoration Material (from Transfers)</label><select id="transferSelect"><option value="">-- Sync First --</option></select></div>
+                <div><label>Prep/Processing Fees</label><select id="feeSelect" onchange="applyFee()"><option value="0">-- Optional --</option></select></div>
             </div>
-            <div class="grid" style="margin-top:10px;">
+            <div class="grid" style="margin-top:12px;">
                 <div><label>Dim Width (in)</label><input type="number" id="w" value="0" step="0.1"></div>
                 <div><label>Dim Height (in)</label><input type="number" id="h" value="0" step="0.1"></div>
             </div>
-            <div id="feeManualContainer" style="margin-top:10px; display:none; background:#fff3e0; padding:10px; border-radius:8px;">
+            <div id="feeManualContainer" style="margin-top:12px; display:none; background:#fff3e0; padding:15px; border-radius:8px;">
                 <label>Confirmed Fee Amount ($)</label>
                 <input type="number" id="manualFee" value="0.00" step="0.01">
             </div>
         </div>
 
-        <div id="laserSection" style="display:none; background: #bbdefb; padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid #64b5f6;">
+        <div id="laserSection" style="display:none; background: #bbdefb; padding: 20px; border-radius: 10px; margin-top: 15px; border: 1px solid #64b5f6;">
             <div class="grid">
                 <div><label>Laser Module</label><select id="laserModule"><option value="40w">40W Diode</option><option value="2w">2W IR</option></select></div>
-                <div><label>Total Laser Time (Batch Mins)</label><input type="number" id="laserMins" value="10"></div>
+                <div><label>Total Laser Time (Mins)</label><input type="number" id="laserMins" value="10"></div>
             </div>
         </div>
 
@@ -122,7 +123,7 @@
     </div>
 
     <div id="resultBox" style="display:none;">
-        <span class="section-label no-print">3. Summary</span>
+        <span class="section-label no-print">3. Quote Summary</span>
         <table id="quoteTable">
             <thead><tr><th>Description</th><th>Qty</th><th>Total</th><th class="no-print">Edit/X</th></tr></thead>
             <tbody id="quoteBody"></tbody>
@@ -130,27 +131,27 @@
 
         <div class="adj-box no-print">
             <div class="grid">
-                <div><strong>Discount %</strong> <input type="number" id="manualDiscount" value="0" oninput="renderQuote()"></div>
+                <div><strong>Manual Discount %</strong> <input type="number" id="manualDiscount" value="0" oninput="renderQuote()"></div>
                 <div>
-                    <input type="checkbox" id="applyTax" onchange="renderQuote()"> <strong>Tax %</strong>
+                    <input type="checkbox" id="applyTax" onchange="renderQuote()"> <strong>Apply Sales Tax %</strong>
                     <input type="number" id="taxOverride" value="7.5" step="0.1" oninput="renderQuote()">
                 </div>
             </div>
         </div>
 
         <div class="grand-total-box">
-            <div id="final-discount-line" style="color: #d32f2f; font-size: 0.5em;"></div>
-            <div id="tax-line" style="font-size: 0.5em; color: #455a64;"></div>
-            <strong>Total: $<span id="grandTotal">0.00</span></strong>
+            <div id="final-discount-line" style="color: #d32f2f; font-size: 0.5em; margin-bottom: 5px;"></div>
+            <div id="tax-line" style="font-size: 0.5em; color: #455a64; margin-bottom: 5px;"></div>
+            <strong>GRAND TOTAL: $<span id="grandTotal">0.00</span></strong>
         </div>
         
         <div id="printTerms">
-            <strong>TERMS & CONDITIONS:</strong> 50% deposit required on custom orders. No returns on custom items. Payment confirms approval of design/qty.
+            <strong>NOTICE TO CUSTOMER:</strong> 50% deposit required on custom orders. No returns on customized items. Final payment confirms approval of design, quantity, and sizing.
         </div>
 
         <div class="grid no-print">
-            <button style="background:#546e7a; color:white;" onclick="window.print()">🖨️ Print Quote</button>
-            <button style="background:#ff9800; color:white;" onclick="recordQuote()">💾 Record Order</button>
+            <button style="background:#546e7a; color:white; border-bottom: 4px solid #37474f;" onclick="window.print()">🖨️ Print / Save PDF</button>
+            <button style="background:#ff9800; color:white; border-bottom: 4px solid #e68a00;" onclick="recordQuote()">💾 Record Order</button>
         </div>
     </div>
 </div>
@@ -159,18 +160,26 @@
 let blanks = [], transfers = [], fees = [], shopRates = {}, quoteItems = [], editingIndex = -1;
 const proxy = "https://corsproxy.io/?";
 const base = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?output=csv";
-const urls = { blanks: base, settings: base + "&gid=1511041891&single=true", fees: base + "&gid=413242066&single=true", transfers: base + "&gid=1573687412&single=true" };
+const urls = {
+    blanks: base,
+    settings: base + "&gid=1511041891&single=true",
+    fees: base + "&gid=413242066&single=true",
+    transfers: base + "&gid=1573687412&single=true"
+};
 const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94BxLsUcKHa8uN9hC6UqxjB8r6ZeBfg/viewform";
 
 async function fetchAllData() {
-    document.getElementById('sync-status').innerText = "⌛ Syncing...";
+    document.getElementById('sync-status').innerText = "⌛ Syncing Data...";
     try {
         const [b, s, f, t] = await Promise.all(Object.values(urls).map(url => fetch(proxy + encodeURIComponent(url)).then(r => r.text())));
-        blanks = b.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, ""), p: parseFloat(c[1]) || 0 }; });
-        transfers = t.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, ""), p: parseFloat(c[1]) || 0 }; });
-        fees = f.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, ""), p: parseFloat(c[1]) || 0 }; });
+        blanks = b.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
+        transfers = t.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
+        fees = f.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: c[0].replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
         s.split('\n').forEach(r => { const c = r.split(','); shopRates[c[0].trim()] = parseFloat(c[1]); });
-        populateSelect('blankSelect', blanks); populateSelect('transferSelect', transfers); populateSelect('feeSelect', fees);
+
+        populateSelect('blankSelect', blanks);
+        populateSelect('transferSelect', transfers);
+        populateSelect('feeSelect', fees);
         if (shopRates.Tax_Rate) document.getElementById('taxOverride').value = (shopRates.Tax_Rate * 100).toFixed(1);
         document.getElementById('quoteDate').innerText = new Date().toLocaleDateString();
         document.getElementById('sync-status').innerText = "✅ Ready";
@@ -178,7 +187,7 @@ async function fetchAllData() {
 }
 
 function populateSelect(id, data) {
-    const s = document.getElementById(id); s.innerHTML = '<option value="">-- Select --</option>';
+    const s = document.getElementById(id); s.innerHTML = '<option value="">-- Select Item --</option>';
     data.forEach((item, i) => { const o = document.createElement('option'); o.value = i; o.text = `${item.n} ($${item.p})`; s.add(o); });
 }
 
@@ -207,7 +216,7 @@ function applyFee() {
 function calculateCompoundCost() {
     const p = document.getElementById('process').value, q = parseInt(document.getElementById('qty').value) || 1;
     const markup = shopRates.Markup || 1, laborMin = (shopRates.Labor_Rate || 30) / 60;
-    const printerRate = (shopRates.Printer_Rate || 0) / 60, pressRate = (shopRates.Press_Rate || 0) / 60;
+    const printerRate = shopRates.Printer_Rate || 0, pressRate = shopRates.Press_Rate || 0;
     
     let materialCost = 0;
     if (p !== 'press_only') {
@@ -234,11 +243,12 @@ function handleMainAction() {
     const q = document.getElementById('qty').value;
     
     let desc = "";
-    if (p === 'press_only') desc = "Press Labor Only (Customer Blank)";
+    if (p === 'press_only') desc = "Heat Press Labor Only (Customer Blank/Transfer)";
     else {
         if (bIdx !== "") desc += blanks[bIdx].n + (size ? ` [${size}]` : "");
         if (tIdx !== "") desc += ` w/ ${document.getElementById('w').value}x${document.getElementById('h').value} ${transfers[tIdx].n}`;
-        if (p === 'hybrid' || p === 'laser') desc += " (Laser Engraved)";
+        if (p === 'hybrid') desc += " (Leather/Acrylic Hybrid)";
+        if (p === 'laser') desc += " (Custom Laser Work)";
     }
 
     const itemData = { desc, qty: q, total: calculateCompoundCost(),
@@ -246,11 +256,11 @@ function handleMainAction() {
     };
 
     if (editingIndex === -1) { quoteItems.push(itemData); } 
-    else { quoteItems[editingIndex] = itemData; editingIndex = -1; document.getElementById('mainActionButton').innerHTML = "➕ Add Compound Item"; }
+    else { quoteItems[editingIndex] = itemData; editingIndex = -1; document.getElementById('mainActionButton').innerHTML = "➕ Add Compound Item"; document.getElementById('mainActionButton').classList.remove('btn-update-active'); }
 
     const fIdx = document.getElementById('feeSelect').value;
     if (fIdx !== "0") {
-        quoteItems.push({ desc: `Fee: ${fees[fIdx].n}`, qty: 1, total: parseFloat(document.getElementById('manualFee').value) || 0, raw: null });
+        quoteItems.push({ desc: `Processing: ${fees[fIdx].n}`, qty: 1, total: parseFloat(document.getElementById('manualFee').value) || 0, raw: null });
         document.getElementById('feeSelect').value = "0"; applyFee();
     }
     renderQuote();
@@ -266,8 +276,8 @@ function renderQuote() {
     const disc = parseFloat(document.getElementById('manualDiscount').value) || 0, runningSub = subTotal * (1 - disc / 100);
     let taxAmt = 0; const tRate = parseFloat(document.getElementById('taxOverride').value) / 100;
     if (document.getElementById('applyTax').checked) taxAmt = runningSub * tRate;
-    document.getElementById('final-discount-line').innerText = disc > 0 ? `Discount (${disc}%): -$${(subTotal * disc / 100).toFixed(2)}` : "";
-    document.getElementById('tax-line').innerText = taxAmt > 0 ? `Tax (${(tRate * 100).toFixed(1)}%): +$${taxAmt.toFixed(2)}` : "";
+    document.getElementById('final-discount-line').innerText = disc > 0 ? `Discount Applied (${disc}%): -$${(subTotal * disc / 100).toFixed(2)}` : "";
+    document.getElementById('tax-line').innerText = taxAmt > 0 ? `Sales Tax (${(tRate * 100).toFixed(1)}%): +$${taxAmt.toFixed(2)}` : "";
     document.getElementById('grandTotal').innerText = (runningSub + taxAmt).toFixed(2);
     document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
 }
@@ -279,10 +289,11 @@ function editItem(index) {
     document.getElementById('transferSelect').value = itm.tIdx; document.getElementById('w').value = itm.w;
     document.getElementById('h').value = itm.h; document.getElementById('laserModule').value = itm.lM; document.getElementById('laserMins').value = itm.lT;
     toggleSections();
-    document.getElementById('mainActionButton').innerHTML = "✅ Update Item";
+    document.getElementById('mainActionButton').innerHTML = "✅ Update Compound Item"; document.getElementById('mainActionButton').classList.add('btn-update-active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function startNewQuote() { if(confirm("Clear current quote?")) { quoteItems = []; renderQuote(); } }
+function startNewQuote() { if(confirm("Discard current quote and start fresh?")) { quoteItems = []; renderQuote(); } }
 function removeItem(index) { quoteItems.splice(index, 1); renderQuote(); }
 function recordQuote() {
     const ids = { item: "entry.1633428776", qty: "entry.892135426", total: "entry.920745966" };
