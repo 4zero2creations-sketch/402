@@ -5,49 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>4 Zero 2 Creations | Shop Master Pro</title>
     <style>
-        /* BASE STYLING - High Contrast for the Bench */
+        /* BASE STYLING */
         body { font-family: 'Segoe UI', sans-serif; background: #333; padding: 20px; color: #333; line-height: 1.5; }
         .container { max-width: 850px; margin: auto; background: #eee; padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border-top: 10px solid #d32f2f; }
         .logo-text { font-size: 28px; text-transform: uppercase; font-weight: 800; text-align: center; display: block; margin-bottom: 20px; color: #111; border-bottom: 2px solid #ccc; padding-bottom: 10px; }
-        
-        /* MODULAR CARDS */
-        .card { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
         .card-title { font-size: 0.85em; font-weight: 900; color: #d32f2f; text-transform: uppercase; margin-bottom: 15px; display: block; border-left: 5px solid #d32f2f; padding-left: 12px; }
-        
-        /* INPUTS & GRID */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         label { font-weight: bold; font-size: 0.85em; display: block; margin-bottom: 5px; color: #444; }
         input, select { width: 100%; padding: 12px; border: 1px solid #bbb; border-radius: 6px; box-sizing: border-box; font-size: 15px; background: #fafafa; }
-        
-        /* BUTTONS */
         button { cursor: pointer; font-weight: bold; text-transform: uppercase; border-radius: 6px; border: none; transition: 0.2s; }
         .btn-sync { background: #1976d2; color: white; padding: 10px 20px; font-size: 0.8em; border-bottom: 3px solid #0d47a1; }
         .btn-add { background: #d32f2f; color: white; padding: 18px; width: 100%; font-size: 1.1em; margin-top: 10px; border-bottom: 5px solid #b71c1c; }
         .btn-edit { background: #1976d2; color: white; padding: 6px 10px; font-size: 0.8em; margin-right: 5px; }
         .btn-remove { background: #c62828; color: white; padding: 6px 10px; font-size: 0.8em; }
-        
-        /* QUOTE SUMMARY */
-        table { width: 100%; margin-top: 15px; border-collapse: collapse; background: #fff; table-layout: fixed; }
+        table { width: 100%; margin-top: 15px; border-collapse: collapse; table-layout: fixed; background: #fff; }
         th { background: #455a64; color: white; padding: 12px; text-align: left; font-size: 0.85em; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9em; word-wrap: break-word; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9em; word-wrap: break-word; overflow: hidden; }
         .grand-total-box { font-size: 2.2em; text-align: center; padding: 25px; background: #fff9c4; border: 3px solid #fbc02d; border-radius: 10px; margin-top: 20px; }
         .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #90a4ae; }
 
-        /* PRINT LOGIC */
+        /* PRINT LOGIC - AGGRESSIVE FIX */
         #printHeader { display: none; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
         #printTerms { display: none; margin-top: 30px; font-size: 10px; border-top: 1px solid #ccc; padding-top: 10px; font-style: italic; }
 
         @media print {
-            @page { size: portrait; margin: 0.5in; }
+            @page { size: portrait; margin: 0.6in; }
+            body { background: white !important; padding: 0 !important; margin: 0 !important; }
             .no-print, button, .card-title, .adj-box, #sync-status { display: none !important; }
-            body { background: white !important; padding: 0 !important; zoom: 0.98; }
             .container { box-shadow: none !important; border: none !important; width: 100% !important; background: white !important; padding: 0 !important; margin: 0 !important; }
-            .card { border: none !important; padding: 0 !important; box-shadow: none !important; }
             #printHeader, #printTerms { display: block !important; width: 100% !important; }
-            table { border: 1px solid #000 !important; width: 100% !important; }
+            table { width: 95% !important; margin: 0 auto !important; border: 1px solid #000 !important; }
             th { background: #ddd !important; color: #000 !important; border-bottom: 2px solid #000 !important; }
             th:last-child, td:last-child { display: none !important; }
-            .grand-total-box { border: 2px solid #000 !important; background: #fff !important; width: 95% !important; margin: 20px auto !important; }
+            .grand-total-box { border: 2px solid #000 !important; background: #fff !important; width: 90% !important; margin: 20px auto !important; padding: 15px !important; }
         }
     </style>
 </head>
@@ -124,12 +115,10 @@
 
     <div id="resultBox" style="display:none;">
         <div class="card">
-            <span class="card-title no-print">3. Quote Summary</span>
             <table id="quoteTable">
-                <thead><tr><th style="width:60%">Description</th><th style="width:10%">Qty</th><th style="width:15%">Total</th><th class="no-print" style="width:15%">Edit/X</th></tr></thead>
+                <thead><tr><th style="width:50%">Description</th><th style="width:15%">Qty</th><th style="width:15%">Total</th><th class="no-print" style="width:20%">Edit/X</th></tr></thead>
                 <tbody id="quoteBody"></tbody>
             </table>
-
             <div class="adj-box no-print">
                 <div class="grid">
                     <div><strong>Discount %</strong> <input type="number" id="manualDiscount" value="0" oninput="renderQuote()"></div>
@@ -139,7 +128,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="grand-total-box">
                 <div id="disc-line" style="color: #d32f2f; font-size: 0.5em;"></div>
                 <div id="tax-line" style="font-size: 0.5em; color: #455a64;"></div>
@@ -208,9 +196,8 @@ function calculateCost() {
     const markup = shopRates.Markup || 1.0, laborMin = (shopRates.Labor_Rate || 30) / 60;
     const printLabor = (shopRates.Print_Labor_Rate || laborMin);
     const printerRate = (shopRates.Printer_Rate || 0) / 60;
-    const kwRate = 0.12 / 60;
-    const printerPower = ((shopRates.Printer_Watts || 300) / 1000) * kwRate;
-    const pressPower = ((shopRates.Press_Watts || 1500) / 1000) * kwRate;
+    const printerPower = ((shopRates.Printer_Watts || 300) / 1000) * (0.12 / 60);
+    const pressPower = ((shopRates.Press_Watts || 1500) / 1000) * (0.12 / 60);
     const pressRate = (shopRates.Press_Rate || 0);
 
     let mat = 0;
@@ -236,7 +223,7 @@ function handleMainAction() {
     const p = document.getElementById('process').value, bIdx = document.getElementById('blankSelect').value;
     const tIdx = document.getElementById('transferSelect').value, size = document.getElementById('itemSize').value, q = document.getElementById('qty').value;
     let desc = "";
-    if (p === 'press_only') desc = "Press Labor Only (Customer Blank)";
+    if (p === 'press_only') desc = "Press Labor Only";
     else {
         if (bIdx !== "" && p !== 'transfer_only' && p !== 'laser') desc += blanks[bIdx].n + (size ? ` [${size}]` : "");
         if (tIdx !== "") desc += (desc ? " w/ " : "") + `${document.getElementById('w').value}x${document.getElementById('h').value} ${transfers[tIdx].n}`;
