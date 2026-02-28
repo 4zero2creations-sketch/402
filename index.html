@@ -17,6 +17,9 @@
         .btn-sync { background: #1976d2; color: white; border-bottom: 4px solid #1565c0; }
         .btn-add { background: #d32f2f; color: white; font-size: 18px; margin-top: 20px; border-bottom: 4px solid #b71c1c; }
         .btn-update-active { background: #2e7d32 !important; color: white !important; }
+        .btn-remove, .btn-edit { padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; width: auto; display: inline-block; margin: 0 2px; }
+        .btn-edit { background: #1976d2; color: white; }
+        .btn-remove { background: #c62828; color: white; }
         .grand-total-box { font-size: 2em; background: #fff9c4; padding: 20px; border: 3px solid #fbc02d; text-align: center; border-radius: 12px; margin-top: 20px; }
         .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; }
         table { width: 100%; margin-top: 20px; border-collapse: collapse; background: #eee; border-radius: 8px; overflow: hidden; table-layout: fixed; }
@@ -34,7 +37,7 @@
             table { width: 100% !important; table-layout: fixed !important; border: 1px solid #333 !important; }
             th { background: #f0f0f0 !important; color: black !important; border-bottom: 2px solid #333 !important; }
             td { border-bottom: 1px solid #999 !important; color: black !important; }
-            table th:last-child, table td:last-child { display: none !important; }
+            th:nth-child(4), td:nth-child(4) { display: none !important; }
             .grand-total-box { border: 2px solid black !important; background: white !important; color: black !important; width: 95% !important; margin: 20px auto !important; }
         }
     </style>
@@ -47,13 +50,14 @@
     <div id="custInfoSummary">
         <strong id="printName"></strong><br>
         <span id="printAddr"></span><br>
-        <span id="printPhone"></span> | <span id="printEmail"></span>
+        <span id="printPhone"></span> | <span id="printEmail"></span><br>
+        <small>Date: <span id="quoteDate"></span></small>
     </div>
 
     <div class="no-print">
         <div class="grid">
             <button class="btn-sync" onclick="fetchAllData()">🔄 Sync Shop Data</button>
-            <button style="background:#607d8b;" onclick="startNewQuote()">✨ New Quote</button>
+            <button style="background:#607d8b; color:white;" onclick="startNewQuote()">✨ New Quote</button>
         </div>
         <div id="sync-status" style="text-align:center; font-size:12px; font-weight:bold; margin-top:5px;">Status: Ready</div>
 
@@ -177,10 +181,8 @@ async function fetchAllData() {
         feeSelect.innerHTML = '<option value="0">-- Select Example --</option>';
         fee.split('\n').filter(r => r.trim() !== '').slice(1).forEach(r => {
             const c = r.split(',');
-            const opt = document.createElement('option');
-            opt.value = parseFloat(c[1]) || 0;
-            opt.text = `${c[0].replace(/"/g, "")} ($${opt.value})`;
-            feeSelect.add(opt);
+            const opt = document.createElement('option'); opt.value = parseFloat(c[1]) || 0;
+            opt.text = `${c[0].replace(/"/g, "")} ($${opt.value})`; feeSelect.add(opt);
         });
         const select = document.getElementById('itemSelect');
         select.innerHTML = '<option value="">-- Select Item --</option>';
@@ -188,6 +190,7 @@ async function fetchAllData() {
             const opt = document.createElement('option'); opt.value = i; opt.text = `${item.name} ($${item.price.toFixed(2)})`; select.add(opt);
         });
         if (shopRates.Tax_Rate) document.getElementById('taxOverride').value = (shopRates.Tax_Rate * 100).toFixed(1);
+        document.getElementById('quoteDate').innerText = new Date().toLocaleDateString();
         document.getElementById('sync-status').innerText = "✅ Ready";
     } catch (e) { document.getElementById('sync-status').innerText = "❌ Sync Error"; }
 }
@@ -211,18 +214,13 @@ function handleProcessChange() {
 }
 
 function calculateCost() {
-    const itmIdx = document.getElementById('itemSelect').value;
-    if (itmIdx === "") return 0;
-    const itm = catalogData[itmIdx];
-    const qty = parseInt(document.getElementById('qty').value) || 1;
-    const process = document.getElementById('type').value;
-    const laborMin = (shopRates.Labor_Rate || 30) / 60;
-    const markup = shopRates.Markup || 1;
+    const itmIdx = document.getElementById('itemSelect').value; if (itmIdx === "") return 0;
+    const itm = catalogData[itmIdx], qty = parseInt(document.getElementById('qty').value) || 1, process = document.getElementById('type').value;
+    const laborMin = (shopRates.Labor_Rate || 30) / 60, markup = shopRates.Markup || 1;
     let materialCost = 0;
     if (process !== 'press_only') {
         if (itm.name.toUpperCase().includes("DTF")) {
-            const w = parseFloat(document.getElementById('dtfWidth').value) || 0;
-            const h = parseFloat(document.getElementById('dtfHeight').value) || 0;
+            const w = parseFloat(document.getElementById('dtfWidth').value) || 0, h = parseFloat(document.getElementById('dtfHeight').value) || 0;
             materialCost = (w * h) * itm.price * qty;
         } else { materialCost = itm.price * qty; }
     }
@@ -238,9 +236,7 @@ function calculateCost() {
 
 function handleMainAction() {
     if (document.getElementById('itemSelect').value === "") return alert("Select an item!");
-    const itmText = catalogData[document.getElementById('itemSelect').value].name;
-    const process = document.getElementById('type').value;
-    const cost = calculateCost();
+    const itmText = catalogData[document.getElementById('itemSelect').value].name, process = document.getElementById('type').value, cost = calculateCost();
     const itemData = { desc: `${itmText} [${process.toUpperCase()}]`, qty: document.getElementById('qty').value, total: cost, 
         raw: { itemIdx: document.getElementById('itemSelect').value, type: process, qty: document.getElementById('qty').value, w: document.getElementById('dtfWidth').value, h: document.getElementById('dtfHeight').value, prep: document.getElementById('prepMins').value, laserM: document.getElementById('laserModule').value, laserT: document.getElementById('laserMins').value }
     };
@@ -278,7 +274,6 @@ function editItem(index) {
     document.getElementById('laserModule').value = itm.laserM; document.getElementById('laserMins').value = itm.laserT;
     handleProcessChange(); checkDtfItem();
     document.getElementById('mainActionButton').innerHTML = "✅ Update Item"; document.getElementById('mainActionButton').classList.add('btn-update-active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function startNewQuote() { if(confirm("Clear current quote?")) { quoteItems = []; renderQuote(); } }
