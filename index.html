@@ -16,15 +16,32 @@
         button { cursor: pointer; font-weight: bold; text-transform: uppercase; border-radius: 6px; border: none; transition: 0.2s; }
         .btn-sync { background: #1976d2; color: white; padding: 10px 20px; font-size: 0.8em; border-bottom: 3px solid #0d47a1; }
         .btn-add { background: #d32f2f; color: white; padding: 18px; width: 100%; font-size: 1.1em; margin-top: 10px; border-bottom: 5px solid #b71c1c; }
-        .btn-remove { background: #c62828; color: white; padding: 5px 10px; }
+        .btn-update-active { background: #2e7d32 !important; border-bottom-color: #1b5e20 !important; }
+        .btn-edit { background: #1976d2; color: white; padding: 6px 10px; font-size: 0.8em; margin-right: 5px; }
+        .btn-remove { background: #c62828; color: white; padding: 6px 10px; font-size: 0.8em; }
+        table { width: 100%; margin-top: 15px; border-collapse: collapse; table-layout: fixed; }
+        th { background: #455a64; color: white; padding: 12px; text-align: left; font-size: 0.85em; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9em; word-wrap: break-word; }
         .grand-total-box { font-size: 2.2em; text-align: center; padding: 25px; background: #fff9c4; border: 3px solid #fbc02d; border-radius: 10px; margin-top: 20px; }
         .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #90a4ae; }
         #printHeader { display: none; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
+        #printTerms { display: none; margin-top: 30px; font-size: 10px; border-top: 1px solid #ccc; padding-top: 10px; font-style: italic; }
+
         @media print {
-            .no-print, button, .card-title, .adj-box { display: none !important; }
-            .container { box-shadow: none !important; border: none !important; width: 100% !important; background: white !important; }
-            #printHeader { display: block !important; }
+            @page { size: portrait; margin: 0.5in; }
+            body { background: white !important; padding: 0 !important; margin: 0 !important; }
+            .no-print, button, .card-title, .adj-box, #sync-status { display: none !important; }
+            .container { 
+                box-shadow: none !important; border: none !important; 
+                width: 100% !important; max-width: 100% !important; 
+                background: white !important; padding: 0 !important; margin: 0 !important;
+            }
+            .card { border: none !important; padding: 0 !important; }
+            #printHeader, #printTerms { display: block !important; width: 100% !important; }
+            table { width: 100% !important; border: 1px solid #000 !important; }
+            th { background: #ddd !important; color: #000 !important; border-bottom: 2px solid #000 !important; }
             th:last-child, td:last-child { display: none !important; }
+            .grand-total-box { border: 2px solid #000 !important; background: #fff !important; width: 98% !important; margin: 20px auto !important; }
         }
     </style>
 </head>
@@ -93,14 +110,14 @@
                 <div><label>Optional Prep Fee</label><select id="feeSelect"><option value="">-- None --</option></select></div>
             </div>
 
-            <button class="btn-add" onclick="handleMainAction()">➕ Add to Quote</button>
+            <button class="btn-add" id="mainActionButton" onclick="handleMainAction()">➕ Add to Quote</button>
         </div>
     </div>
 
     <div id="resultBox" style="display:none;">
         <div class="card">
             <table id="quoteTable">
-                <thead><tr><th>Description</th><th>Qty</th><th>Total</th><th class="no-print">X</th></tr></thead>
+                <thead><tr><th style="width:60%">Description</th><th style="width:10%">Qty</th><th style="width:15%">Total</th><th class="no-print" style="width:15%">Edit/X</th></tr></thead>
                 <tbody id="quoteBody"></tbody>
             </table>
 
@@ -119,6 +136,7 @@
                 <div id="tax-line" style="font-size: 0.5em; color: #455a64;"></div>
                 <strong>TOTAL: $<span id="grandTotal">0.00</span></strong>
             </div>
+            <div id="printTerms"><strong>TERMS:</strong> 50% deposit required. No returns on custom items. Final payment confirms approval.</div>
             <div class="grid no-print" style="margin-top:20px;">
                 <button style="background:#546e7a; color:white;" onclick="window.print()">🖨️ Print Quote</button>
                 <button style="background:#ff9800; color:white;" onclick="recordQuote()">💾 Record Order</button>
@@ -128,7 +146,7 @@
 </div>
 
 <script>
-let blanks = [], transfers = [], fees = [], shopRates = {}, quoteItems = [];
+let blanks = [], transfers = [], fees = [], shopRates = {}, quoteItems = [], editingIndex = -1;
 const proxy = "https://corsproxy.io/?";
 const base = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?output=csv";
 const urls = { blanks: base, settings: base + "&gid=1511041891&single=true", fees: base + "&gid=413242066&single=true", transfers: base + "&gid=1573687412&single=true" };
@@ -191,32 +209,47 @@ function calculateCost() {
 function handleMainAction() {
     const p = document.getElementById('process').value, q = document.getElementById('qty').value;
     const bIdx = document.getElementById('blankSelect').value, tIdx = document.getElementById('transferSelect').value;
+    const size = document.getElementById('itemSize').value;
     let desc = "";
     if (p === 'press_only') desc = "Heat Press Labor Only";
     else {
-        if (bIdx !== "") desc += blanks[bIdx].n + ` [${document.getElementById('itemSize').value}] `;
-        if (tIdx !== "") desc += `w/ ${document.getElementById('w').value}x${document.getElementById('h').value} ${transfers[tIdx].n}`;
+        if (bIdx !== "") desc += blanks[bIdx].n + (size ? ` [${size}]` : "");
+        if (tIdx !== "") desc += ` w/ ${document.getElementById('w').value}x${document.getElementById('h').value} ${transfers[tIdx].n}`;
     }
-    quoteItems.push({ desc: desc || "Custom Item", qty: q, total: calculateCost() });
-    
-    // Add Fee if selected
+    const itemData = { desc: desc || "Custom Item", qty: q, total: calculateCost(),
+        raw: { p, q, bIdx, tIdx, size, w: document.getElementById('w').value, h: document.getElementById('h').value, lM: document.getElementById('laserModule').value, lT: document.getElementById('laserMins').value }
+    };
+    if (editingIndex === -1) { quoteItems.push(itemData); } 
+    else { quoteItems[editingIndex] = itemData; editingIndex = -1; document.getElementById('mainActionButton').innerHTML = "➕ Add to Quote"; document.getElementById('mainActionButton').classList.remove('btn-update-active'); }
+
     const fIdx = document.getElementById('feeSelect').value;
-    if (fIdx !== "") {
-        quoteItems.push({ desc: `Fee: ${fees[fIdx].n}`, qty: 1, total: fees[fIdx].p });
-        document.getElementById('feeSelect').value = ""; 
-    }
+    if (fIdx !== "") { quoteItems.push({ desc: `Fee: ${fees[fIdx].n}`, qty: 1, total: fees[fIdx].p, raw: null }); document.getElementById('feeSelect').value = ""; }
     renderQuote();
 }
 
 function renderQuote() {
     const body = document.getElementById('quoteBody'); body.innerHTML = ""; let sub = 0;
-    quoteItems.forEach((item, i) => { sub += item.total; body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print"><button onclick="remove(${i})" class="btn-remove">X</button></td></tr>`; });
+    quoteItems.forEach((item, i) => { 
+        sub += item.total; 
+        const editBtn = item.raw ? `<button class="btn-edit" onclick="editItem(${i})">✎</button>` : '';
+        body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print">${editBtn}<button class="btn-remove" onclick="remove(${i})">X</button></td></tr>`; 
+    });
     const disc = parseFloat(document.getElementById('manualDiscount').value) || 0, running = sub * (1 - disc / 100);
     let tax = 0; if (document.getElementById('applyTax').checked) tax = running * (parseFloat(document.getElementById('taxOverride').value) / 100);
     document.getElementById('disc-line').innerText = disc > 0 ? `Discount: -$${(sub * disc / 100).toFixed(2)}` : "";
     document.getElementById('tax-line').innerText = tax > 0 ? `Tax: +$${tax.toFixed(2)}` : "";
     document.getElementById('grandTotal').innerText = (running + tax).toFixed(2);
     document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
+}
+
+function editItem(i) {
+    const itm = quoteItems[i].raw; editingIndex = i;
+    document.getElementById('process').value = itm.p; document.getElementById('qty').value = itm.q;
+    document.getElementById('blankSelect').value = itm.bIdx; document.getElementById('itemSize').value = itm.size;
+    document.getElementById('transferSelect').value = itm.tIdx; document.getElementById('w').value = itm.w;
+    document.getElementById('h').value = itm.h; document.getElementById('laserModule').value = itm.lM; document.getElementById('laserMins').value = itm.lT;
+    updateUI(); document.getElementById('mainActionButton').innerHTML = "✅ Update Item"; document.getElementById('mainActionButton').classList.add('btn-update-active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function remove(i) { quoteItems.splice(i, 1); renderQuote(); }
