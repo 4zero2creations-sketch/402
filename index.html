@@ -17,36 +17,24 @@
         .btn-sync { background: #1976d2; color: white; border-bottom: 4px solid #1565c0; }
         .btn-add { background: #d32f2f; color: white; font-size: 18px; margin-top: 20px; border-bottom: 4px solid #b71c1c; }
         .btn-update-active { background: #2e7d32 !important; color: white !important; }
-        .btn-pdf { background: #546e7a; color: white; }
-        .btn-record { background: #ff9800; color: white; border-bottom: 4px solid #e68a00; }
-        .btn-remove, .btn-edit { padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; width: auto; display: inline-block; margin-top: 0; }
-        .btn-edit { background: #1976d2; color: white; margin-right: 5px; }
-        .btn-remove { background: #c62828; color: white; }
         .grand-total-box { font-size: 2em; background: #fff9c4; padding: 20px; border: 3px solid #fbc02d; text-align: center; border-radius: 12px; margin-top: 20px; }
         .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; }
         table { width: 100%; margin-top: 20px; border-collapse: collapse; background: #eee; border-radius: 8px; overflow: hidden; table-layout: fixed; }
         th { background: #455a64; color: white; padding: 12px; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid #ccc; word-wrap: break-word; }
+        #custInfoSummary { display: none; margin-bottom: 20px; line-height: 1.4; border-bottom: 1px solid #ccc; padding-bottom: 15px; }
         #printTerms { display: none; margin-top: 30px; font-size: 10px; color: #555; border-top: 1px solid #ccc; padding-top: 10px; }
 
         @media print {
             @page { margin: 0.5in; }
             body { background: white !important; padding: 0 !important; margin: 0 !important; }
-            .container { 
-                box-shadow: none !important; 
-                border: none !important; 
-                width: 100% !important; 
-                max-width: 100% !important; 
-                margin: 0 !important; 
-                padding: 10px !important; 
-                background: white !important; 
-            }
+            .container { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 15px !important; background: white !important; }
             .no-print, button, .section-label, label, input, select, textarea, .btn-add, .adj-box, #sync-status { display: none !important; }
-            #printTerms { display: block !important; width: 100% !important; }
+            #custInfoSummary, #printTerms { display: block !important; width: 100% !important; }
             table { width: 100% !important; table-layout: fixed !important; border: 1px solid #333 !important; }
             th { background: #f0f0f0 !important; color: black !important; border-bottom: 2px solid #333 !important; }
             td { border-bottom: 1px solid #999 !important; color: black !important; }
-            table th:last-child, table td:last-child { display: none !important; } /* Hide Edit/X column */
+            table th:last-child, table td:last-child { display: none !important; }
             .grand-total-box { border: 2px solid black !important; background: white !important; color: black !important; width: 95% !important; margin: 20px auto !important; }
         }
     </style>
@@ -56,6 +44,12 @@
 <div class="container">
     <div class="logo-area"><p class="logo-text">4 Zero 2 Creations</p></div>
     
+    <div id="custInfoSummary">
+        <strong id="printName"></strong><br>
+        <span id="printAddr"></span><br>
+        <span id="printPhone"></span> | <span id="printEmail"></span>
+    </div>
+
     <div class="no-print">
         <div class="grid">
             <button class="btn-sync" onclick="fetchAllData()">🔄 Sync Shop Data</button>
@@ -63,7 +57,17 @@
         </div>
         <div id="sync-status" style="text-align:center; font-size:12px; font-weight:bold; margin-top:5px;">Status: Ready</div>
 
-        <span class="section-label">1. Job Entry</span>
+        <span class="section-label">1. Customer Details</span>
+        <div class="grid">
+            <input type="text" id="custName" placeholder="Customer Name" oninput="updatePrintInfo()">
+            <input type="text" id="custPhone" placeholder="Phone Number" oninput="updatePrintInfo()">
+        </div>
+        <div class="grid" style="margin-top:10px;">
+            <input type="text" id="custEmail" placeholder="Email Address" oninput="updatePrintInfo()">
+            <input type="text" id="custAddr" placeholder="Physical Address" oninput="updatePrintInfo()">
+        </div>
+
+        <span class="section-label">2. Job Entry</span>
         <div class="grid">
             <div><label>Process</label>
                 <select id="type" onchange="handleProcessChange()">
@@ -114,7 +118,7 @@
     </div>
 
     <div id="resultBox" style="display:none;">
-        <span class="section-label no-print">2. Summary</span>
+        <span class="section-label no-print">3. Summary</span>
         <table id="quoteTable">
             <thead><tr><th>Details</th><th>Qty</th><th>Total</th><th class="no-print">Edit/X</th></tr></thead>
             <tbody id="quoteBody"></tbody>
@@ -141,8 +145,8 @@
         </div>
 
         <div class="grid no-print">
-            <button class="btn-pdf" onclick="window.print()">🖨️ Print Quote</button>
-            <button class="btn-record" onclick="recordQuote()">💾 Record Order</button>
+            <button style="background:#546e7a; color:white;" onclick="window.print()">🖨️ Print Quote</button>
+            <button style="background:#ff9800; color:white;" onclick="recordQuote()">💾 Record Order</button>
         </div>
     </div>
 </div>
@@ -186,6 +190,13 @@ async function fetchAllData() {
         if (shopRates.Tax_Rate) document.getElementById('taxOverride').value = (shopRates.Tax_Rate * 100).toFixed(1);
         document.getElementById('sync-status').innerText = "✅ Ready";
     } catch (e) { document.getElementById('sync-status').innerText = "❌ Sync Error"; }
+}
+
+function updatePrintInfo() {
+    document.getElementById('printName').innerText = document.getElementById('custName').value;
+    document.getElementById('printPhone').innerText = document.getElementById('custPhone').value;
+    document.getElementById('printEmail').innerText = document.getElementById('custEmail').value;
+    document.getElementById('printAddr').innerText = document.getElementById('custAddr').value;
 }
 
 function toggleSetupFee() { document.getElementById('setupFeeContainer').style.display = document.getElementById('applySetup').value === 'yes' ? 'block' : 'none'; }
