@@ -248,6 +248,7 @@ function handleMainAction() {
         document.getElementById('applySetup').value = 'no'; toggleSetupFee();
     }
     renderQuote();
+    // HIGH-SPEED ENTRY: We do NOT clear the dropdown or dimensions here.
 }
 
 function renderQuote() {
@@ -274,6 +275,7 @@ function editItem(index) {
     document.getElementById('laserModule').value = itm.laserM; document.getElementById('laserMins').value = itm.laserT;
     handleProcessChange(); checkDtfItem();
     document.getElementById('mainActionButton').innerHTML = "✅ Update Item"; document.getElementById('mainActionButton').classList.add('btn-update-active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function startNewQuote() { if(confirm("Clear current quote?")) { quoteItems = []; renderQuote(); } }
