@@ -25,7 +25,6 @@
         .grand-total-box { font-size: 2.2em; text-align: center; padding: 25px; background: #fff9c4; border: 3px solid #fbc02d; border-radius: 10px; margin-top: 20px; }
         .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #90a4ae; }
 
-        /* PRINT LOGIC */
         #printHeader { display: none; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
         #printTerms { display: none; margin-top: 30px; font-size: 10px; border-top: 1px solid #ccc; padding-top: 10px; font-style: italic; }
 
@@ -145,19 +144,19 @@
 <script>
 let blanks = [], transfers = [], fees = [], shopRates = {}, quoteItems = [], editingIndex = -1;
 
-// NEW REPUBLISHED LINK BASE
 const base = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?output=csv";
-
-// Mapped to your specific tab GIDs
-const urls = { 
-    blanks: base, 
-    settings: base + "&gid=1511041891&single=true", 
-    fees: base + "&gid=413242066&single=true", 
-    transfers: base + "&gid=1573687412&single=true" 
-};
 
 async function fetchAllData() {
     document.getElementById('sync-status').innerText = "⌛ Syncing...";
+    const cb = "&cachebust=" + new Date().getTime();
+    
+    const urls = { 
+        blanks: base + cb, 
+        settings: base + "&gid=1511041891&single=true" + cb, 
+        fees: base + "&gid=413242066&single=true" + cb, 
+        transfers: base + "&gid=1573687412&single=true" + cb 
+    };
+
     try {
         const proxyPrefix = "https://api.allorigins.win/get?url=";
         const fetchResults = await Promise.all(Object.values(urls).map(url => 
@@ -165,22 +164,53 @@ async function fetchAllData() {
                 .then(r => r.ok ? r.json() : Promise.reject())
         ));
 
+        console.log("Raw Sync Data:", fetchResults);
         const [b, s, f, t] = fetchResults.map(res => res.contents);
 
-        blanks = b.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: (c[0]||"").replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
-        transfers = t.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: (c[0]||"").replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
-        fees = f.split('\n').filter(r => r.trim() !== '').slice(1).map(r => { const c = r.split(','); return { n: (c[0]||"").replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; });
-        s.split('\n').forEach(r => { const c = r.split(','); if(c[0]) shopRates[c[0].trim()] = parseFloat(c[1]) || 0; });
+        if (!b || b.length < 5) { throw new Error("Data incomplete"); }
+
+        blanks = b.split(/\r?\n/).filter(r => r.trim() !== '').slice(1).map(r => { 
+            const c = r.split(','); return { n: (c[0]||"").replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; 
+        });
+        transfers = t.split(/\r?\n/).filter(r => r.trim() !== '').slice(1).map(r => { 
+            const c = r.split(','); return { n: (c[0]||"").replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; 
+        });
+        fees = f.split(/\r?\n/).filter(r => r.trim() !== '').slice(1).map(r => { 
+            const c = r.split(','); return { n: (c[0]||"").replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; 
+        });
+        s.split(/\r?\n/).forEach(r => { 
+            const c = r.split(','); if(c[0]) shopRates[c[0].trim()] = parseFloat(c[1]) || 0; 
+        });
         
-        fillSelect('blankSelect', blanks); fillSelect('transferSelect', transfers); fillSelect('feeSelect', fees);
+        console.log("Parsed Blanks:", blanks);
+
+        fillSelect('blankSelect', blanks); 
+        fillSelect('transferSelect', transfers); 
+        fillSelect('feeSelect', fees);
+        
         document.getElementById('quoteDate').innerText = new Date().toLocaleDateString();
         document.getElementById('sync-status').innerText = "✅ Ready";
-    } catch (e) { document.getElementById('sync-status').innerText = "❌ Sync Error"; }
+    } catch (e) { 
+        console.error("Sync Error:", e);
+        document.getElementById('sync-status').innerText = "❌ Sync Error"; 
+    }
 }
 
 function fillSelect(id, data) {
-    const s = document.getElementById(id); s.innerHTML = '<option value="">-- Select --</option>';
-    data.forEach((item, i) => { const o = document.createElement('option'); o.value = i; o.text = `${item.n} ($${item.p})`; s.add(o); });
+    const s = document.getElementById(id); 
+    s.innerHTML = '<option value="">-- Select --</option>';
+    if (data.length === 0) {
+        const o = document.createElement('option');
+        o.text = "No data found";
+        s.add(o);
+        return;
+    }
+    data.forEach((item, i) => { 
+        const o = document.createElement('option'); 
+        o.value = i; 
+        o.text = `${item.n} ($${item.p})`; 
+        s.add(o); 
+    });
 }
 
 function syncPrint() {
@@ -192,10 +222,6 @@ function syncPrint() {
 
 function updateUI() {
     const p = document.getElementById('process').value;
-    if (p === 'transfer_only' || p === 'laser') {
-        document.getElementById('blankSelect').value = "";
-        document.getElementById('itemSize').value = "";
-    }
     document.getElementById('blankRow').style.display = (p === 'transfer_only' || p === 'laser') ? 'none' : 'grid';
     document.getElementById('decoRow').style.display = (p === 'press_only') ? 'none' : 'grid';
     document.getElementById('laserRow').style.display = (p === 'laser' || p === 'hybrid') ? 'grid' : 'none';
@@ -203,8 +229,12 @@ function updateUI() {
 
 function applyFee() {
     const fIdx = document.getElementById('feeSelect').value;
-    if (fIdx !== "0" && fIdx !== "") { document.getElementById('manualFeeBox').style.display = 'block'; document.getElementById('manualFee').value = fees[fIdx].p; }
-    else { document.getElementById('manualFeeBox').style.display = 'none'; }
+    if (fIdx !== "0" && fIdx !== "" && fIdx !== "No data found") { 
+        document.getElementById('manualFeeBox').style.display = 'block'; 
+        document.getElementById('manualFee').value = fees[fIdx].p; 
+    } else { 
+        document.getElementById('manualFeeBox').style.display = 'none'; 
+    }
 }
 
 function calculateCost() {
@@ -254,7 +284,11 @@ function handleMainAction() {
     else { quoteItems[editingIndex] = itemData; editingIndex = -1; document.getElementById('mainActionButton').innerHTML = "➕ Add Item to Quote"; }
     
     const fIdx = document.getElementById('feeSelect').value;
-    if (fIdx !== "0" && fIdx !== "") { quoteItems.push({ desc: `Fee: ${fees[fIdx].n}`, qty: 1, total: parseFloat(document.getElementById('manualFee').value) || 0, raw: null }); document.getElementById('feeSelect').value = "0"; applyFee(); }
+    if (fIdx !== "0" && fIdx !== "" && fIdx !== "No data found") { 
+        quoteItems.push({ desc: `Fee: ${fees[fIdx].n}`, qty: 1, total: parseFloat(document.getElementById('manualFee').value) || 0, raw: null }); 
+        document.getElementById('feeSelect').value = "0"; 
+        applyFee(); 
+    }
     renderQuote();
 }
 
@@ -298,7 +332,6 @@ async function recordQuote() {
         quoteItems = []; renderQuote();
     } catch (e) { alert("Error recording quote."); }
 }
-
 window.onload = fetchAllData;
 </script>
 </body>
