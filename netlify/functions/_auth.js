@@ -1,13 +1,17 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { getStore } from "@netlify/blobs";
 
 const COOKIE = "qdesk_session";
+const AUTH_STORE = "4zero2-auth";
+const AUTH_KEY = "config";
 
-function secret() {
-  return globalThis.Netlify?.env?.get("QDESK_SESSION_SECRET") || "";
+export async function getAuthConfig() {
+  const store = getStore(AUTH_STORE, { consistency: "strong" });
+  return await store.get(AUTH_KEY, { type: "json" });
 }
 
-function sign(payload) {
-  return createHmac("sha256", secret()).update(payload).digest("base64url");
+function sign(payload, secret) {
+  return createHmac("sha256", secret).update(payload).digest("base64url");
 }
 
 function parseCookies(req) {
@@ -18,9 +22,9 @@ function parseCookies(req) {
   }));
 }
 
-export function createSessionToken() {
+export function createSessionToken(secret) {
   const payload = Buffer.from(JSON.stringify({ role: "staff", exp: Date.now() + 30 * 24 * 60 * 60 * 1000 })).toString("base64url");
-  return `${payload}.${sign(payload)}`;
+  return `${payload}.${sign(payload, secret)}`;
 }
 
 export function sessionCookie(token) {
@@ -31,12 +35,14 @@ export function clearSessionCookie() {
   return `${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`;
 }
 
-export function verifySession(req) {
-  if (!secret()) return null;
+export async function verifySession(req) {
+  const cfg = await getAuthConfig();
+  const secret = String(cfg?.sessionSecret || "");
+  if (!secret) return null;
   const token = parseCookies(req)[COOKIE];
   if (!token || !token.includes(".")) return null;
   const [payload, sig] = token.split(".");
-  const expected = sign(payload);
+  const expected = sign(payload, secret);
   const a = Buffer.from(sig);
   const b = Buffer.from(expected);
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
@@ -50,7 +56,7 @@ export function verifySession(req) {
 }
 
 export async function requireUser(req) {
-  const user = verifySession(req);
+  const user = await verifySession(req);
   if (!user) return { user: null, error: json({ error: "Unauthorized" }, 401) };
   return { user, error: null };
 }
