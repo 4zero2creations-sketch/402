@@ -1,7 +1,15 @@
-import { getStore } from "@netlify/blobs";
+import { getStore, getDeployStore } from "@netlify/blobs";
 import { requireUser, json } from "./_auth.js";
 
 const STORE = "4zero2-internal";
+
+function getBlobStore() {
+  const deployContext = globalThis.Netlify?.context?.deploy?.context;
+  if (deployContext === "production") {
+    return getStore(STORE, { consistency: "strong" });
+  }
+  return getDeployStore(STORE);
+}
 
 function makeId() {
   const d = new Date();
@@ -13,7 +21,7 @@ function makeId() {
 export default async (req) => {
   const { user, error } = await requireUser();
   if (error) return error;
-  const store = getStore(STORE);
+  const store = getBlobStore();
 
   if (req.method === "POST") {
     let body;
