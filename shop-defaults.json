@@ -35,6 +35,8 @@
   "settings":{
     "kWh_Rate":0.12,
     "Setup_Fee":5.0,
+    "Item_Cost_Multiplier":2.0,
+    "Overall_Markup":1.0,
     "Markup":2.0,
     "Labor_Rate":30.0,
     "Diode_Watts":275,
