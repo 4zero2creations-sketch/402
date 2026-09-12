@@ -1,5 +1,5 @@
 // Pricing model override: raw item cost is marked up first, then production costs are added,
-// then an optional overall multiplier is applied to the finished calculated unit price.
+// then an optional overall markup percentage is applied to the finished calculated unit price.
 
 function migratePricingSettings(){
   if(!cfg?.settings)return;
@@ -7,14 +7,16 @@ function migratePricingSettings(){
   if(!Number.isFinite(Number(cfg.settings.Item_Cost_Multiplier))){
     cfg.settings.Item_Cost_Multiplier=Number.isFinite(legacy)&&legacy>0?legacy:2;
   }
-  if(!Number.isFinite(Number(cfg.settings.Overall_Markup))){
-    cfg.settings.Overall_Markup=1;
+  if(!Number.isFinite(Number(cfg.settings.Overall_Markup_Percent))){
+    const oldOverall=Number(cfg.settings.Overall_Markup);
+    cfg.settings.Overall_Markup_Percent=Number.isFinite(oldOverall)?Math.max(0,(oldOverall-1)*100):0;
   }
 }
 
 delete settingLabels.Markup;
+delete settingLabels.Overall_Markup;
 settingLabels.Item_Cost_Multiplier='Item cost multiplier';
-settingLabels.Overall_Markup='Overall markup multiplier';
+settingLabels.Overall_Markup_Percent='Overall markup %';
 
 const pricingBaseRenderAll=renderAll;
 renderAll=function(){
@@ -32,7 +34,8 @@ calcLine=function(l){
   const qty=Math.max(1,Math.floor(Number(l.quantity)||1));
   const rawItemCost=l.provided==='shop'?Number(item.price)||0:0;
   const itemCostMultiplier=Math.max(0,Number(cfg.settings.Item_Cost_Multiplier)||0);
-  const overallMarkup=Math.max(0,Number(cfg.settings.Overall_Markup)||0);
+  const overallMarkupPercent=Math.max(0,Number(cfg.settings.Overall_Markup_Percent)||0);
+  const overallMarkupMultiplier=1+(overallMarkupPercent/100);
   const markedItemCost=rawItemCost*itemCostMultiplier;
   let process=0,energy=0,detail='';
 
@@ -57,7 +60,7 @@ calcLine=function(l){
 
   const labor=(Number(l.extraLaborMinutes)||0)*(s('Labor_Rate')/60);
   const preOverall=markedItemCost+process+energy+labor;
-  const calculated=preOverall*overallMarkup;
+  const calculated=preOverall*overallMarkupMultiplier;
   const unitPrice=l.unitPriceOverride!==''&&!isNaN(Number(l.unitPriceOverride))?Number(l.unitPriceOverride):calculated;
 
   return{
@@ -65,7 +68,7 @@ calcLine=function(l){
     lineTotal:unitPrice*qty,
     pricing:{
       rawItemCost,itemCostMultiplier,markedItemCost,process,energy,labor,
-      preOverall,overallMarkup
+      preOverall,overallMarkupPercent,overallMarkupMultiplier
     },
     inputs:{...l}
   };
