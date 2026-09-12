@@ -5,9 +5,7 @@ const STORE = "4zero2-internal";
 
 function getBlobStore() {
   const deployContext = globalThis.Netlify?.context?.deploy?.context;
-  if (deployContext === "production") {
-    return getStore(STORE, { consistency: "strong" });
-  }
+  if (deployContext === "production") return getStore(STORE, { consistency: "strong" });
   return getDeployStore(STORE);
 }
 
@@ -19,7 +17,7 @@ function makeId() {
 }
 
 export default async (req) => {
-  const { user, error } = await requireUser();
+  const { user, error } = await requireUser(req);
   if (error) return error;
   const store = getBlobStore();
 
