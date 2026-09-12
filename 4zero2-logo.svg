@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" role="img" aria-label="4Zero2 Creations">
-<defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#d90f43"/><stop offset=".42" stop-color="#ffc43d"/><stop offset=".7" stop-color="#ff7a45"/><stop offset="1" stop-color="#b31745"/></linearGradient></defs>
+<defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#ff2a2a"/><stop offset=".38" stop-color="#f20d5c"/><stop offset=".7" stop-color="#9d35ff"/><stop offset="1" stop-color="#6b27ff"/></linearGradient></defs>
 <rect width="760" height="300" fill="none"/>
 <text x="380" y="175" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="142" font-weight="900" fill="url(#g)">4Zero2</text>
-<text x="380" y="245" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="54" font-weight="800" letter-spacing="5" fill="url(#g)">CREATIONS</text>
+<text x="380" y="245" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="54" font-weight="800" letter-spacing="5" fill="#ffffff">CREATIONS</text>
 </svg>
