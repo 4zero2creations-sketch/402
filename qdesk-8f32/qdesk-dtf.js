@@ -1,5 +1,4 @@
-// DTF-specific machine costing. The printer depreciation rate is derived automatically
-// from purchase cost and expected productive lifetime, while electricity stays separate.
+// DTF-specific machine costing and service modes.
 function migrateDtfSettings(){
   if(!cfg?.settings)return;
   const d={DTF_Printer_Cost:9000,DTF_Printer_Life_Hours:5000,DTF_Printer_Watts:600,DTF_Minimum_Charge:5};
@@ -24,34 +23,50 @@ renderEditors=function(){
   settingsEditor.insertAdjacentHTML('beforeend',`<div class="setting"><label>DTF depreciation rate (auto)</label><input type="text" readonly value="$${money(dtfDepreciationPerMinute())}/min"><span class="small">Calculated from printer cost ÷ lifetime hours ÷ 60.</span></div>`);
 };
 const dtfBaseBlankLine=blankLine;
-blankLine=function(){return{...dtfBaseBlankLine(),dtfPrinterMinutes:1}};
+blankLine=function(){return{...dtfBaseBlankLine(),dtfService:'complete',dtfPrinterMinutes:1}};
+function setDtfService(i,v){pullLineInputs();if(!lines[i])return;lines[i].dtfService=v;if(v==='press_only')lines[i].dtfSource='customer';else if(lines[i].dtfSource==='customer')lines[i].dtfSource='printed';renderQuoteLines()}
+function setDtfSource(i,v){pullLineInputs();if(!lines[i])return;lines[i].dtfSource=v;renderQuoteLines()}
 const dtfBaseLineExtra=lineExtra;
 lineExtra=function(l,i){
   if(l.type!=='dtf')return dtfBaseLineExtra(l,i);
-  return`<div class="line-dynamic"><div class="line-grid"><div class="field"><label>Print width (in)</label><input data-k="dtfW" data-i="${i}" type="number" step=".1" value="${l.dtfW}"></div><div class="field"><label>Print height (in)</label><input data-k="dtfH" data-i="${i}" type="number" step=".1" value="${l.dtfH}"></div><div class="field"><label>Transfer source</label><select data-k="dtfSource" data-i="${i}"><option value="printed" ${l.dtfSource==='printed'?'selected':''}>Printed in-house</option><option value="purchased" ${l.dtfSource==='purchased'?'selected':''}>Purchased</option></select></div><div class="field"><label>DTF printer run time (min)</label><input data-k="dtfPrinterMinutes" data-i="${i}" type="number" min="0" step=".1" value="${l.dtfPrinterMinutes??1}"><span class="small">Used only for in-house transfers.</span></div><div class="field"><label>Press / handling min</label><input data-k="pressMinutes" data-i="${i}" type="number" step=".25" value="${l.pressMinutes}"></div></div></div>`;
+  const service=l.dtfService||'complete';
+  const source=service==='press_only'?'customer':(l.dtfSource||'printed');
+  const needsTransfer=service!=='press_only';
+  const needsPress=service!=='transfer_only';
+  const sourceOptions=service==='complete'
+    ?`<option value="printed" ${source==='printed'?'selected':''}>Printed in-house</option><option value="purchased" ${source==='purchased'?'selected':''}>Purchased by us</option><option value="customer" ${source==='customer'?'selected':''}>Customer supplied</option>`
+    :service==='transfer_only'
+      ?`<option value="printed" ${source==='printed'?'selected':''}>Printed in-house</option><option value="purchased" ${source==='purchased'?'selected':''}>Purchased by us</option>`
+      :`<option value="customer" selected>Customer supplied</option>`;
+  return`<div class="line-dynamic"><div class="line-grid"><div class="field full"><label>DTF service</label><select data-k="dtfService" data-i="${i}" onchange="setDtfService(${i},this.value)"><option value="complete" ${service==='complete'?'selected':''}>Complete DTF — Transfer + Press</option><option value="transfer_only" ${service==='transfer_only'?'selected':''}>Transfer Only — Customer applies it</option><option value="press_only" ${service==='press_only'?'selected':''}>Press Only — Customer supplies transfer/item</option></select></div><div class="field"><label>Print width (in)</label><input data-k="dtfW" data-i="${i}" type="number" step=".1" value="${l.dtfW}"></div><div class="field"><label>Print height (in)</label><input data-k="dtfH" data-i="${i}" type="number" step=".1" value="${l.dtfH}"></div><div class="field"><label>Transfer source</label><select data-k="dtfSource" data-i="${i}" onchange="setDtfSource(${i},this.value)">${sourceOptions}</select></div>${needsTransfer&&source==='printed'?`<div class="field"><label>DTF printer run time (min)</label><input data-k="dtfPrinterMinutes" data-i="${i}" type="number" min="0" step=".1" value="${l.dtfPrinterMinutes??1}"></div>`:''}${needsPress?`<div class="field"><label>Press / handling min</label><input data-k="pressMinutes" data-i="${i}" type="number" min="0" step=".25" value="${l.pressMinutes}"></div>`:''}</div><span class="small">$${money(s('DTF_Minimum_Charge'))} minimum applies to every DTF service line.</span></div>`;
 };
 const dtfBaseCalcLine=calcLine;
 calcLine=function(l){
   if(l.type!=='dtf')return dtfBaseCalcLine(l);
   migratePricingSettings();migrateDtfSettings();
+  const service=l.dtfService||'complete';
+  const source=service==='press_only'?'customer':(l.dtfSource||'printed');
+  const doesTransfer=service!=='press_only';
+  const doesPress=service!=='transfer_only';
   const item=cfg.catalog[Number(l.catalogIndex)]||{name:'Custom',price:0};
   const qty=Math.max(1,Math.floor(Number(l.quantity)||1));
-  const rawItemCost=l.provided==='shop'?Number(item.price)||0:0;
+  const includeBlank=service==='complete'&&l.provided==='shop';
+  const rawItemCost=includeBlank?(Number(item.price)||0):0;
   const itemCostMultiplier=Math.max(0,Number(cfg.settings.Item_Cost_Multiplier)||0);
   const markedItemCost=rawItemCost*itemCostMultiplier;
   const overallMarkupPercent=Math.max(0,Number(cfg.settings.Overall_Markup_Percent)||0);
   const overallMarkupMultiplier=1+(overallMarkupPercent/100);
   const area=(Number(l.dtfW)||0)*(Number(l.dtfH)||0);
-  const pressMins=Math.max(0,Number(l.pressMinutes)||0);
-  const printerMins=l.dtfSource==='printed'?Math.max(0,Number(l.dtfPrinterMinutes)||0):0;
-  const rawTransferCost=area*(l.dtfSource==='purchased'?rate('DTF purchased'):rate('DTF printed'));
+  const pressMins=doesPress?Math.max(0,Number(l.pressMinutes)||0):0;
+  const printerMins=doesTransfer&&source==='printed'?Math.max(0,Number(l.dtfPrinterMinutes)||0):0;
+  const rawTransferCost=doesTransfer&&source!=='customer'?area*(source==='purchased'?rate('DTF purchased'):rate('DTF printed')):0;
   const markedTransferCost=rawTransferCost*itemCostMultiplier;
-  const application=area*rate('Heat press work');
-  const pressOverhead=pressMins*s('Press_Rate');
+  const application=doesPress?area*rate('Heat press work'):0;
+  const pressOverhead=doesPress?pressMins*s('Press_Rate'):0;
   const printerDepreciation=printerMins*dtfDepreciationPerMinute();
   const process=markedTransferCost+application+pressOverhead+printerDepreciation;
-  const pressEnergy=powerCost(s('Press_Watts'),pressMins);
-  const printerEnergy=l.dtfSource==='printed'?powerCost(s('DTF_Printer_Watts'),printerMins):0;
+  const pressEnergy=doesPress?powerCost(s('Press_Watts'),pressMins):0;
+  const printerEnergy=printerMins?powerCost(s('DTF_Printer_Watts'),printerMins):0;
   const energy=pressEnergy+printerEnergy;
   const labor=(Number(l.extraLaborMinutes)||0)*(s('Labor_Rate')/60);
   const preOverall=markedItemCost+process+energy+labor;
@@ -62,5 +77,7 @@ calcLine=function(l){
   const minimum=Math.max(0,s('DTF_Minimum_Charge'));
   const minimumApplied=!override&&lineTotal<minimum;
   if(minimumApplied){lineTotal=minimum;unitPrice=lineTotal/qty}
-  return{type:l.type,item:item.name,quantity:qty,detail:`DTF ${l.dtfW}×${l.dtfH} in, ${l.dtfSource} transfer${minimumApplied?' • minimum charge applied':''}`,unitPrice,calculatedUnitPrice:calculatedUnit,lineTotal,pricing:{rawItemCost,itemCostMultiplier,markedItemCost,rawTransferCost,markedTransferCost,application,pressOverhead,printerDepreciation,process,pressEnergy,printerEnergy,energy,labor,preOverall,overallMarkupPercent,overallMarkupMultiplier,dtfMinimum:minimum,minimumApplied},inputs:{...l}};
+  const serviceLabel=service==='transfer_only'?'Transfer only':service==='press_only'?'Press only':'Complete DTF';
+  const sourceLabel=source==='printed'?'in-house transfer':source==='purchased'?'purchased transfer':'customer-supplied transfer';
+  return{type:l.type,item:service==='transfer_only'?'DTF Transfer Only':service==='press_only'?'DTF Press Only':item.name,quantity:qty,detail:`${serviceLabel}, ${l.dtfW}×${l.dtfH} in, ${sourceLabel}${minimumApplied?' • $'+money(minimum)+' minimum applied':''}`,unitPrice,calculatedUnitPrice:calculatedUnit,lineTotal,pricing:{service,source,rawItemCost,itemCostMultiplier,markedItemCost,rawTransferCost,markedTransferCost,application,pressOverhead,printerDepreciation,process,pressEnergy,printerEnergy,energy,labor,preOverall,overallMarkupPercent,overallMarkupMultiplier,dtfMinimum:minimum,minimumApplied},inputs:{...l,dtfService:service,dtfSource:source}};
 };
