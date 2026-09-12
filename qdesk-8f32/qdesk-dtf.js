@@ -44,11 +44,12 @@ calcLine=function(l){
   const area=(Number(l.dtfW)||0)*(Number(l.dtfH)||0);
   const pressMins=Math.max(0,Number(l.pressMinutes)||0);
   const printerMins=l.dtfSource==='printed'?Math.max(0,Number(l.dtfPrinterMinutes)||0):0;
-  const transferMaterial=area*(l.dtfSource==='purchased'?rate('DTF purchased'):rate('DTF printed'));
+  const rawTransferCost=area*(l.dtfSource==='purchased'?rate('DTF purchased'):rate('DTF printed'));
+  const markedTransferCost=rawTransferCost*itemCostMultiplier;
   const application=area*rate('Heat press work');
   const pressOverhead=pressMins*s('Press_Rate');
   const printerDepreciation=printerMins*dtfDepreciationPerMinute();
-  const process=transferMaterial+application+pressOverhead+printerDepreciation;
+  const process=markedTransferCost+application+pressOverhead+printerDepreciation;
   const pressEnergy=powerCost(s('Press_Watts'),pressMins);
   const printerEnergy=l.dtfSource==='printed'?powerCost(s('DTF_Printer_Watts'),printerMins):0;
   const energy=pressEnergy+printerEnergy;
@@ -61,5 +62,5 @@ calcLine=function(l){
   const minimum=Math.max(0,s('DTF_Minimum_Charge'));
   const minimumApplied=!override&&lineTotal<minimum;
   if(minimumApplied){lineTotal=minimum;unitPrice=lineTotal/qty}
-  return{type:l.type,item:item.name,quantity:qty,detail:`DTF ${l.dtfW}×${l.dtfH} in, ${l.dtfSource} transfer${minimumApplied?' • minimum charge applied':''}`,unitPrice,calculatedUnitPrice:calculatedUnit,lineTotal,pricing:{rawItemCost,itemCostMultiplier,markedItemCost,transferMaterial,application,pressOverhead,printerDepreciation,process,pressEnergy,printerEnergy,energy,labor,preOverall,overallMarkupPercent,overallMarkupMultiplier,dtfMinimum:minimum,minimumApplied},inputs:{...l}};
+  return{type:l.type,item:item.name,quantity:qty,detail:`DTF ${l.dtfW}×${l.dtfH} in, ${l.dtfSource} transfer${minimumApplied?' • minimum charge applied':''}`,unitPrice,calculatedUnitPrice:calculatedUnit,lineTotal,pricing:{rawItemCost,itemCostMultiplier,markedItemCost,rawTransferCost,markedTransferCost,application,pressOverhead,printerDepreciation,process,pressEnergy,printerEnergy,energy,labor,preOverall,overallMarkupPercent,overallMarkupMultiplier,dtfMinimum:minimum,minimumApplied},inputs:{...l}};
 };
