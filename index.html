@@ -1,338 +1,120 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4 Zero 2 Creations | Shop Master Pro</title>
-    <style>
-        /* BASE STYLING */
-        body { font-family: 'Segoe UI', sans-serif; background: #333; padding: 20px; color: #333; line-height: 1.5; }
-        .container { max-width: 850px; margin: auto; background: #eee; padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border-top: 10px solid #d32f2f; }
-        .logo-text { font-size: 28px; text-transform: uppercase; font-weight: 800; text-align: center; display: block; margin-bottom: 20px; color: #111; border-bottom: 2px solid #ccc; padding-bottom: 10px; }
-        .card { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
-        .card-title { font-size: 0.85em; font-weight: 900; color: #d32f2f; text-transform: uppercase; margin-bottom: 15px; display: block; border-left: 5px solid #d32f2f; padding-left: 12px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        label { font-weight: bold; font-size: 0.85em; display: block; margin-bottom: 5px; color: #444; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #bbb; border-radius: 6px; box-sizing: border-box; font-size: 15px; background: #fafafa; }
-        button { cursor: pointer; font-weight: bold; text-transform: uppercase; border-radius: 6px; border: none; transition: 0.2s; }
-        .btn-sync { background: #1976d2; color: white; padding: 10px 20px; font-size: 0.8em; border-bottom: 3px solid #0d47a1; }
-        .btn-add { background: #d32f2f; color: white; padding: 18px; width: 100%; font-size: 1.1em; margin-top: 10px; border-bottom: 5px solid #b71c1c; }
-        .btn-edit { background: #1976d2; color: white; padding: 6px 10px; font-size: 0.8em; margin-right: 5px; }
-        .btn-remove { background: #c62828; color: white; padding: 6px 10px; font-size: 0.8em; }
-        table { width: 100%; margin-top: 15px; border-collapse: collapse; table-layout: fixed; background: #fff; }
-        th { background: #455a64; color: white; padding: 12px; text-align: left; font-size: 0.85em; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9em; word-wrap: break-word; overflow: hidden; }
-        .grand-total-box { font-size: 2.2em; text-align: center; padding: 25px; background: #fff9c4; border: 3px solid #fbc02d; border-radius: 10px; margin-top: 20px; }
-        .adj-box { background: #cfd8dc; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #90a4ae; }
-
-        #printHeader { display: none; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px; }
-        #printTerms { display: none; margin-top: 30px; font-size: 10px; border-top: 1px solid #ccc; padding-top: 10px; font-style: italic; }
-
-        @media print {
-            @page { size: portrait; margin: 0.6in; }
-            body { background: white !important; padding: 0 !important; margin: 0 !important; }
-            .no-print, button, .card-title, .adj-box, #sync-status { display: none !important; }
-            .container { box-shadow: none !important; border: none !important; width: 100% !important; background: white !important; padding: 0 !important; margin: 0 !important; }
-            #printHeader, #printTerms { display: block !important; width: 100% !important; }
-            table { width: 95% !important; margin: 0 auto !important; border: 1px solid #000 !important; }
-            th { background: #ddd !important; color: #000 !important; border-bottom: 2px solid #000 !important; }
-            th:last-child, td:last-child { display: none !important; }
-            .grand-total-box { border: 2px solid #000 !important; background: #fff !important; width: 90% !important; margin: 20px auto !important; padding: 15px !important; }
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="4Zero2 Creations offers custom apparel, DTF transfers, laser engraving, 3D printing, personalized gifts, and custom projects.">
+<title>4Zero2 Creations | Custom Apparel, Engraving & 3D Printing</title>
+<link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="rp-home">
+<div class="rp-topbar">CUSTOM APPAREL • LASER ENGRAVING • 3D PRINTING • CUSTOM ORDERS</div>
+<header class="rp-header">
+  <div class="container rp-header-inner">
+    <a class="rp-brand" href="index.html"><img src="4zero2-logo.svg" alt="4Zero2 Creations"></a>
+    <div class="rp-search"><span>Search products, gifts, apparel...</span><strong>⌕</strong></div>
+    <nav class="rp-nav">
+      <a class="active" href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="quote.html">Custom Orders</a>
+      <a href="#about">About</a>
+      <a href="quote.html">Contact</a>
+    </nav>
+    <div class="rp-tag">IDEAS<br><span>CUSTOMIZED</span><br>REALITY</div>
+  </div>
+</header>
 
-<div class="container">
-    <div class="logo-text">4 Zero 2 Creations</div>
-
-    <div id="printHeader">
-        <div style="float:right; text-align:right;"><strong>DATE:</strong> <span id="quoteDate"></span></div>
-        <strong id="pName" style="font-size: 1.3em;"></strong><br>
-        <span id="pAddr"></span><br>
-        <span id="pPhone"></span> | <span id="pEmail"></span>
+<main>
+<section class="rp-hero">
+  <div class="container rp-hero-grid">
+    <div class="rp-hero-copy">
+      <div class="rp-eyebrow">MADE YOUR WAY</div>
+      <h1>CUSTOM<br>APPAREL<br><span>THAT STANDS OUT</span></h1>
+      <p>Shirts, hoodies, hats, transfers, gifts and more — custom made for businesses, events, teams, gifts, or just because.</p>
+      <div class="rp-actions">
+        <a class="rp-btn rp-btn-primary" href="#categories">SHOP WHAT WE MAKE →</a>
+        <a class="rp-btn rp-btn-ghost" href="quote.html">START A CUSTOM ORDER</a>
+      </div>
     </div>
-
-    <div class="no-print">
-        <div class="card">
-            <span class="card-title">1. Customer & Sourcing</span>
-            <div class="grid">
-                <input type="text" id="custName" placeholder="Customer Name" oninput="syncPrint()">
-                <input type="text" id="custPhone" placeholder="Phone Number" oninput="syncPrint()">
-            </div>
-            <div class="grid" style="margin-top:10px;">
-                <input type="text" id="custEmail" placeholder="Email" oninput="syncPrint()">
-                <input type="text" id="custAddr" placeholder="Address" oninput="syncPrint()">
-            </div>
-            <div class="grid" style="margin-top:10px;">
-                <select id="sourcing"><option value="shop">Shop Provides Blank</option><option value="cust">Customer Provides Blank</option></select>
-                <button class="btn-sync" onclick="fetchAllData()">🔄 Sync All Shop Data</button>
-            </div>
-            <div id="sync-status" style="text-align:center; font-size:11px; margin-top:5px; font-weight:bold;">Status: Ready</div>
-        </div>
-
-        <div class="card">
-            <span class="card-title">2. Build Your Product</span>
-            <div class="grid">
-                <div><label>Process Type</label>
-                    <select id="process" onchange="updateUI()">
-                        <option value="dtf_full">Full DTF Service</option>
-                        <option value="press_only">Heat Press ONLY</option>
-                        <option value="transfer_only">Transfer ONLY</option>
-                        <option value="laser">Laser Only</option>
-                        <option value="hybrid">Hybrid (Laser Patch + Press)</option>
-                    </select>
-                </div>
-                <div><label>Quantity</label><input type="number" id="qty" value="1"></div>
-            </div>
-
-            <div id="blankRow" class="grid" style="margin-top:15px;">
-                <div><label>Blank Item</label><select id="blankSelect"><option value="">-- Sync First --</option></select></div>
-                <div><label>Size / Detail</label><input type="text" id="itemSize" placeholder="XL, Hat, etc."></div>
-            </div>
-
-            <div id="decoRow" class="grid" style="margin-top:15px;">
-                <div><label>Transfer/Material</label><select id="transferSelect"><option value="">-- Sync First --</option></select></div>
-                <div><label>Dimensions (WxH)</label>
-                    <div style="display:flex; gap:5px;"><input type="number" id="w" placeholder="W" step="0.1"><input type="number" id="h" placeholder="H" step="0.1"></div>
-                </div>
-            </div>
-
-            <div id="laserRow" class="grid" style="margin-top:15px; display:none;">
-                <div><label>Laser Module</label><select id="laserModule"><option value="40w">40W Diode</option><option value="2w">2W IR</option></select></div>
-                <div><label>Time (Mins)</label><input type="number" id="laserMins" value="10"></div>
-            </div>
-
-            <div class="grid" style="margin-top:15px;">
-                <div><label>Prep Fee</label><select id="feeSelect" onchange="applyFee()"><option value="0">-- None --</option></select></div>
-                <div id="manualFeeBox" style="display:none;"><label>Confirmed Fee ($)</label><input type="number" id="manualFee" value="0.00" step="0.01"></div>
-            </div>
-
-            <button class="btn-add" id="mainActionButton" onclick="handleMainAction()">➕ Add Item to Quote</button>
-        </div>
+    <div class="rp-hero-art" aria-label="4Zero2 Creations product showcase">
+      <div class="rp-glow one"></div><div class="rp-glow two"></div>
+      <div class="rp-shirt"><div class="rp-mini-logo">4ZERO2<br><span>CREATIONS</span></div></div>
+      <div class="rp-tumbler">4ZERO2</div>
+      <div class="rp-cap">4Z02</div>
+      <div class="rp-scribble">MORE<br>THAN JUST<br>SHIRTS.</div>
     </div>
+  </div>
+</section>
 
-    <div id="resultBox" style="display:none;">
-        <div class="card">
-            <table id="quoteTable">
-                <thead><tr><th style="width:50%">Description</th><th style="width:15%">Qty</th><th style="width:15%">Total</th><th class="no-print" style="width:20%">Edit/X</th></tr></thead>
-                <tbody id="quoteBody"></tbody>
-            </table>
-            <div class="adj-box no-print">
-                <div class="grid">
-                    <div><strong>Discount %</strong> <input type="number" id="manualDiscount" value="0" oninput="renderQuote()"></div>
-                    <div>
-                        <input type="checkbox" id="applyTax" onchange="renderQuote()"> <strong>Tax %</strong>
-                        <input type="number" id="taxOverride" value="7.5" step="0.1" oninput="renderQuote()">
-                    </div>
-                </div>
-            </div>
-            <div class="grand-total-box">
-                <div id="disc-line" style="color: #d32f2f; font-size: 0.5em;"></div>
-                <div id="tax-line" style="font-size: 0.5em; color: #455a64;"></div>
-                <strong>TOTAL: $<span id="grandTotal">0.00</span></strong>
-            </div>
-            <div id="printTerms"><strong>TERMS:</strong> 50% deposit required. No returns on custom items. Final payment confirms approval.</div>
-            <div class="grid no-print" style="margin-top:20px;">
-                <button style="background:#546e7a; color:white;" onclick="window.print()">🖨️ Print Quote</button>
-                <button style="background:#ff9800; color:white;" onclick="recordQuote()">💾 Record Order</button>
-            </div>
-        </div>
+<section class="rp-benefits">
+  <div class="container rp-benefit-grid">
+    <div><b>⚡ FAST TURNAROUND</b><span>Small runs welcome</span></div>
+    <div><b>★ LOCALLY OWNED</b><span>Built in Nebraska</span></div>
+    <div><b>⚙ CUSTOM WORK</b><span>Bring your idea to life</span></div>
+    <div><b>▣ SHOP + QUOTE ONLINE</b><span>Simple ordering</span></div>
+  </div>
+</section>
+
+<section class="rp-section" id="categories">
+  <div class="container">
+    <div class="rp-section-head"><h2>SHOP BY CATEGORY</h2><a href="gallery.html">EXPLORE ALL WORK →</a></div>
+    <div class="rp-category-grid">
+      <a class="rp-category apparel" href="dtf-gallery.html"><div class="rp-cat-art">TEE</div><strong>APPAREL</strong><span>Shirts, hoodies, hats & more</span></a>
+      <a class="rp-category laser" href="laser-gallery.html"><div class="rp-cat-art">✦</div><strong>LASER ENGRAVING</strong><span>Personalized gifts & more</span></a>
+      <a class="rp-category print3d" href="3d-gallery.html"><div class="rp-cat-art">◆</div><strong>3D PRINTING</strong><span>Functional & fun creations</span></a>
+      <a class="rp-category gifts" href="gallery.html"><div class="rp-cat-art">♥</div><strong>PERSONALIZED GIFTS</strong><span>Made just for you</span></a>
+      <a class="rp-category custom" href="quote.html"><div class="rp-cat-art">+</div><strong>CUSTOM ORDERS</strong><span>Tell us what you need</span></a>
     </div>
-</div>
+  </div>
+</section>
 
-<script>
-let blanks = [], transfers = [], fees = [], shopRates = {}, quoteItems = [], editingIndex = -1;
+<section class="rp-section rp-products">
+  <div class="container">
+    <div class="rp-section-head"><h2>FEATURED IDEAS</h2><a href="gallery.html">VIEW GALLERY →</a></div>
+    <div class="rp-product-grid">
+      <article class="rp-product"><div class="rp-product-art shirt-art">CUSTOM TEE</div><h3>Custom Printed Shirt</h3><p>Full-color DTF apparel</p><a href="quote.html">GET A QUOTE</a></article>
+      <article class="rp-product"><div class="rp-product-art tumbler-art">20 OZ</div><h3>Engraved Tumbler</h3><p>Custom laser engraving</p><a href="quote.html">GET A QUOTE</a></article>
+      <article class="rp-product"><div class="rp-product-art dragon-art">3D</div><h3>Custom 3D Print</h3><p>Parts, gifts, prototypes</p><a href="quote.html">GET A QUOTE</a></article>
+      <article class="rp-product"><div class="rp-product-art sign-art">YOUR<br>IDEA</div><h3>Personalized Gift</h3><p>Wood, metal & more</p><a href="quote.html">GET A QUOTE</a></article>
+      <article class="rp-product"><div class="rp-product-art transfer-art">DTF</div><h3>DTF Transfer</h3><p>Print-only or full service</p><a href="quote.html">GET A QUOTE</a></article>
+    </div>
+  </div>
+</section>
 
-const base = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8ZvjITchUAB_1BPehZcfFFq4ZHqyQBfGZxa71wQz3b9JHHZBCnC9roKjfrRCnUdJbkp0prPDZDfXO/pub?output=csv";
+<section class="rp-custom-cta">
+  <div class="container rp-custom-grid">
+    <div><span class="rp-iconbox">✎</span><h2>HAVE A CUSTOM IDEA?</h2></div>
+    <p>From one-off designs to bulk orders, bring us the weird, useful, funny, practical, or impossible-looking idea.</p>
+    <a class="rp-btn rp-btn-primary" href="quote.html">GET A QUOTE →</a>
+  </div>
+</section>
 
-async function fetchAllData() {
-    document.getElementById('sync-status').innerText = "⌛ Syncing...";
-    const cb = "&cachebust=" + new Date().getTime();
-    
-    const urls = { 
-        blanks: base + cb, 
-        settings: base + "&gid=1511041891&single=true" + cb, 
-        fees: base + "&gid=413242066&single=true" + cb, 
-        transfers: base + "&gid=1573687412&single=true" + cb 
-    };
+<section class="rp-story" id="about">
+  <div class="container rp-story-grid">
+    <div><div class="rp-eyebrow">WHY 4ZERO2</div><h2>SMALL BUSINESS.<br><span>BIG IDEAS.</span></h2></div>
+    <p>4Zero2 Creations combines custom apparel, engraving, and 3D printing in one shop. That means your project does not have to fit neatly into one category — we can mix processes and build something that actually fits what you need.</p>
+    <a class="rp-btn rp-btn-ghost light" href="gallery.html">SEE OUR WORK</a>
+  </div>
+</section>
 
-    try {
-        const proxyPrefix = "https://api.allorigins.win/get?url=";
-        const fetchResults = await Promise.all(Object.values(urls).map(url => 
-            fetch(`${proxyPrefix}${encodeURIComponent(url)}`)
-                .then(r => r.ok ? r.json() : Promise.reject())
-        ));
+<section class="rp-newsletter">
+  <div class="container rp-news-grid">
+    <div><h3>STAY IN THE LOOP</h3><p>New products, seasonal ideas, and custom project inspiration.</p></div>
+    <form name="rp-newsletter" method="POST" data-netlify="true" class="rp-news-form"><input type="hidden" name="form-name" value="rp-newsletter"><input type="email" name="email" placeholder="Your email address" required><button type="submit">SUBSCRIBE</button></form>
+  </div>
+</section>
+</main>
 
-        console.log("Raw Sync Data:", fetchResults);
-        const [b, s, f, t] = fetchResults.map(res => res.contents);
-
-        if (!b || b.length < 5) { throw new Error("Data incomplete"); }
-
-        blanks = b.split(/\r?\n/).filter(r => r.trim() !== '').slice(1).map(r => { 
-            const c = r.split(','); return { n: (c[0]||"").replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; 
-        });
-        transfers = t.split(/\r?\n/).filter(r => r.trim() !== '').slice(1).map(r => { 
-            const c = r.split(','); return { n: (c[0]||"").replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; 
-        });
-        fees = f.split(/\r?\n/).filter(r => r.trim() !== '').slice(1).map(r => { 
-            const c = r.split(','); return { n: (c[0]||"").replace(/"/g, "").trim(), p: parseFloat(c[1]) || 0 }; 
-        });
-        s.split(/\r?\n/).forEach(r => { 
-            const c = r.split(','); if(c[0]) shopRates[c[0].trim()] = parseFloat(c[1]) || 0; 
-        });
-        
-        console.log("Parsed Blanks:", blanks);
-
-        fillSelect('blankSelect', blanks); 
-        fillSelect('transferSelect', transfers); 
-        fillSelect('feeSelect', fees);
-        
-        document.getElementById('quoteDate').innerText = new Date().toLocaleDateString();
-        document.getElementById('sync-status').innerText = "✅ Ready";
-    } catch (e) { 
-        console.error("Sync Error:", e);
-        document.getElementById('sync-status').innerText = "❌ Sync Error"; 
-    }
-}
-
-function fillSelect(id, data) {
-    const s = document.getElementById(id); 
-    s.innerHTML = '<option value="">-- Select --</option>';
-    if (data.length === 0) {
-        const o = document.createElement('option');
-        o.text = "No data found";
-        s.add(o);
-        return;
-    }
-    data.forEach((item, i) => { 
-        const o = document.createElement('option'); 
-        o.value = i; 
-        o.text = `${item.n} ($${item.p})`; 
-        s.add(o); 
-    });
-}
-
-function syncPrint() {
-    document.getElementById('pName').innerText = document.getElementById('custName').value;
-    document.getElementById('pPhone').innerText = document.getElementById('custPhone').value;
-    document.getElementById('pEmail').innerText = document.getElementById('custEmail').value;
-    document.getElementById('pAddr').innerText = document.getElementById('custAddr').value;
-}
-
-function updateUI() {
-    const p = document.getElementById('process').value;
-    document.getElementById('blankRow').style.display = (p === 'transfer_only' || p === 'laser') ? 'none' : 'grid';
-    document.getElementById('decoRow').style.display = (p === 'press_only') ? 'none' : 'grid';
-    document.getElementById('laserRow').style.display = (p === 'laser' || p === 'hybrid') ? 'grid' : 'none';
-}
-
-function applyFee() {
-    const fIdx = document.getElementById('feeSelect').value;
-    if (fIdx !== "0" && fIdx !== "" && fIdx !== "No data found") { 
-        document.getElementById('manualFeeBox').style.display = 'block'; 
-        document.getElementById('manualFee').value = fees[fIdx].p; 
-    } else { 
-        document.getElementById('manualFeeBox').style.display = 'none'; 
-    }
-}
-
-function calculateCost() {
-    const p = document.getElementById('process').value, q = parseInt(document.getElementById('qty').value) || 1;
-    const markup = shopRates.Markup || 1.0, laborMin = (shopRates.Labor_Rate || 30) / 60;
-    const printLabor = (shopRates.Print_Labor_Rate || laborMin);
-    const printerRate = (shopRates.Printer_Rate || 0) / 60;
-    const printerPower = ((shopRates.Printer_Watts || 300) / 1000) * (0.12 / 60);
-    const pressPower = ((shopRates.Press_Watts || 1500) / 1000) * (0.12 / 60);
-    const pressRate = (shopRates.Press_Rate || 0);
-
-    let mat = 0;
-    if (p !== 'press_only') {
-        const bIdx = document.getElementById('blankSelect').value, tIdx = document.getElementById('transferSelect').value;
-        const bCost = (p !== 'transfer_only' && p !== 'laser' && document.getElementById('sourcing').value === 'shop' && bIdx !== "") ? blanks[bIdx].p : 0;
-        const w = parseFloat(document.getElementById('w').value) || 0, h = parseFloat(document.getElementById('h').value) || 0;
-        const tCost = (tIdx !== "") ? (w * h * transfers[tIdx].p) : 0;
-        mat = (bCost + tCost) * markup * q;
-    }
-
-    let labor = 0;
-    if (p.includes('dtf') || p === 'transfer_only') labor += (15 * (printLabor + printerRate + printerPower));
-    if (p === 'dtf_full' || p === 'press_only' || p === 'hybrid') labor += (6 * q * (laborMin + pressPower + pressRate));
-    if (p === 'laser' || p === 'hybrid') {
-        const lRate = (document.getElementById('laserModule').value === '40w' ? (shopRates.Diode_Rate || 0) : (shopRates.IR_Rate || 0));
-        labor += (parseFloat(document.getElementById('laserMins').value) || 0) * (laborMin + lRate);
-    }
-    return mat + labor;
-}
-
-function handleMainAction() {
-    const p = document.getElementById('process').value, bIdx = document.getElementById('blankSelect').value;
-    const tIdx = document.getElementById('transferSelect').value, size = document.getElementById('itemSize').value, q = document.getElementById('qty').value;
-    let desc = "";
-    if (p === 'press_only') desc = "Press Labor Only";
-    else {
-        if (bIdx !== "" && p !== 'transfer_only' && p !== 'laser') desc += blanks[bIdx].n + (size ? ` [${size}]` : "");
-        if (tIdx !== "") desc += (desc ? " w/ " : "") + `${document.getElementById('w').value}x${document.getElementById('h').value} ${transfers[tIdx].n}`;
-    }
-    if(!desc) desc = "Custom Job";
-
-    const itemData = { desc, qty: q, total: calculateCost(),
-        raw: { p, q, bIdx, tIdx, size, w: document.getElementById('w').value, h: document.getElementById('h').value, lM: document.getElementById('laserModule').value, lT: document.getElementById('laserMins').value }
-    };
-
-    if (editingIndex === -1) { quoteItems.push(itemData); } 
-    else { quoteItems[editingIndex] = itemData; editingIndex = -1; document.getElementById('mainActionButton').innerHTML = "➕ Add Item to Quote"; }
-    
-    const fIdx = document.getElementById('feeSelect').value;
-    if (fIdx !== "0" && fIdx !== "" && fIdx !== "No data found") { 
-        quoteItems.push({ desc: `Fee: ${fees[fIdx].n}`, qty: 1, total: parseFloat(document.getElementById('manualFee').value) || 0, raw: null }); 
-        document.getElementById('feeSelect').value = "0"; 
-        applyFee(); 
-    }
-    renderQuote();
-}
-
-function renderQuote() {
-    const body = document.getElementById('quoteBody'); body.innerHTML = ""; let sub = 0;
-    quoteItems.forEach((item, i) => { 
-        sub += item.total; 
-        const editBtn = item.raw ? `<button class="btn-edit" onclick="editItem(${i})">✎</button>` : '';
-        body.innerHTML += `<tr><td>${item.desc}</td><td>${item.qty}</td><td>$${item.total.toFixed(2)}</td><td class="no-print">${editBtn}<button class="btn-remove" onclick="remove(${i})">X</button></td></tr>`; 
-    });
-    const disc = parseFloat(document.getElementById('manualDiscount').value) || 0, running = sub * (1 - disc / 100);
-    let tax = 0; if (document.getElementById('applyTax').checked) tax = running * (parseFloat(document.getElementById('taxOverride').value) / 100);
-    document.getElementById('disc-line').innerText = disc > 0 ? `Discount: -$${(sub * disc / 100).toFixed(2)}` : "";
-    document.getElementById('tax-line').innerText = tax > 0 ? `Tax: +$${tax.toFixed(2)}` : "";
-    document.getElementById('grandTotal').innerText = (running + tax).toFixed(2);
-    document.getElementById('resultBox').style.display = quoteItems.length > 0 ? "block" : "none";
-}
-
-function editItem(i) {
-    const itm = quoteItems[i].raw; if(!itm) return; editingIndex = i;
-    document.getElementById('process').value = itm.p; document.getElementById('qty').value = itm.q;
-    document.getElementById('blankSelect').value = itm.bIdx; document.getElementById('itemSize').value = itm.size;
-    document.getElementById('transferSelect').value = itm.tIdx; document.getElementById('w').value = itm.w;
-    document.getElementById('h').value = itm.h; document.getElementById('laserModule').value = itm.lM; document.getElementById('laserMins').value = itm.lT;
-    updateUI(); document.getElementById('mainActionButton').innerHTML = "✅ Update Item";
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function remove(i) { quoteItems.splice(i, 1); renderQuote(); }
-
-async function recordQuote() {
-    const formUrl = "https://docs.google.com/forms/d/e/1FAIpQLScuEZvj-nmCo22JDcq94BxLsUcKHa8uN9hC6UqxjB8r6ZeBfg/formResponse";
-    const formData = new FormData();
-    formData.append("entry.1633428776", quoteItems.map(i => i.desc).join(" | "));
-    formData.append("entry.892135426", quoteItems.map(i => i.qty).join(", "));
-    formData.append("entry.920745966", document.getElementById('grandTotal').innerText);
-
-    try {
-        await fetch(formUrl, { method: "POST", mode: "no-cors", body: formData });
-        alert("Success! Quote recorded.");
-        quoteItems = []; renderQuote();
-    } catch (e) { alert("Error recording quote."); }
-}
-window.onload = fetchAllData;
-</script>
+<footer class="rp-footer">
+  <div class="container rp-footer-grid">
+    <div class="rp-footer-brand"><img src="4zero2-logo.svg" alt="4Zero2 Creations"><p>Custom apparel • engraving • 3D printing • more</p></div>
+    <div><h4>SHOP</h4><a href="shop.html">Shop All</a><a href="dtf-gallery.html">Apparel & DTF</a><a href="laser-gallery.html">Laser Engraving</a><a href="3d-gallery.html">3D Printing</a><a href="quote.html">Custom Orders</a></div>
+    <div><h4>SUPPORT</h4><a href="quote.html">Contact Us</a><a href="quote.html">Request a Quote</a><a href="gallery.html">Gallery</a></div>
+    <div><h4>ABOUT</h4><a href="#about">Our Story</a><a href="#about">Why 4Zero2</a><a href="gallery.html">Our Work</a></div>
+    <div class="rp-footer-slogan">SMALL BUSINESS.<br><span>BIG IDEAS.</span></div>
+  </div>
+  <div class="container rp-copyright">© <span id="year"></span> 4Zero2 Creations. All rights reserved.</div>
+</footer>
+<script src="script.js"></script>
 </body>
 </html>

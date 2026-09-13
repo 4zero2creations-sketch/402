@@ -1,0 +1,5 @@
+:root{--rp-red:#ff2424;--rp-pink:#ef165f;--rp-purple:#9d35ff}
+.top{background:linear-gradient(90deg,#09090a,#171017 55%,#1e1029);border-bottom:1px solid #3b2448}
+.hero{background:radial-gradient(circle at 92% 10%,rgba(157,53,255,.12),transparent 30%),radial-gradient(circle at 8% 90%,rgba(255,36,36,.12),transparent 32%),#fff}
+.kicker{color:#9b2fbe}.primary{background:linear-gradient(90deg,var(--rp-red),var(--rp-pink),var(--rp-purple));color:#fff}.tab.active{background:linear-gradient(90deg,var(--rp-red),var(--rp-purple));color:#fff}.login-card{border-top:4px solid #9d35ff}.login-card img,.logo{filter:saturate(1.15)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#9d35ff;box-shadow:0 0 0 3px rgba(157,53,255,.12)}
