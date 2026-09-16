@@ -68,7 +68,8 @@ calcLine=function(l){
   const pressEnergy=doesPress?powerCost(s('Press_Watts'),pressMins):0;
   const printerEnergy=printerMins?powerCost(s('DTF_Printer_Watts'),printerMins):0;
   const energy=pressEnergy+printerEnergy;
-  const labor=(Number(l.extraLaborMinutes)||0)*(s('Labor_Rate')/60);
+  const laborMinutes=pressMins+(Math.max(0,Number(l.extraLaborMinutes)||0));
+  const labor=laborMinutes*(s('Labor_Rate')/60);
   const preOverall=markedItemCost+process+energy+labor;
   const calculatedUnit=preOverall*overallMarkupMultiplier;
   const override=l.unitPriceOverride!==''&&!isNaN(Number(l.unitPriceOverride));
@@ -79,5 +80,5 @@ calcLine=function(l){
   if(minimumApplied){lineTotal=minimum;unitPrice=lineTotal/qty}
   const serviceLabel=service==='transfer_only'?'Transfer only':service==='press_only'?'Press only':'Complete DTF';
   const sourceLabel=source==='printed'?'in-house transfer':source==='purchased'?'purchased transfer':'customer-supplied transfer';
-  return{type:l.type,item:service==='transfer_only'?'DTF Transfer Only':service==='press_only'?'DTF Press Only':item.name,quantity:qty,detail:`${serviceLabel}, ${l.dtfW}×${l.dtfH} in, ${sourceLabel}${minimumApplied?' • $'+money(minimum)+' minimum applied':''}`,unitPrice,calculatedUnitPrice:calculatedUnit,lineTotal,pricing:{service,source,rawItemCost,itemCostMultiplier,markedItemCost,rawTransferCost,markedTransferCost,application,pressOverhead,printerDepreciation,process,pressEnergy,printerEnergy,energy,labor,preOverall,overallMarkupPercent,overallMarkupMultiplier,dtfMinimum:minimum,minimumApplied},inputs:{...l,dtfService:service,dtfSource:source}};
+  return{type:l.type,item:service==='transfer_only'?'DTF Transfer Only':service==='press_only'?'DTF Press Only':item.name,quantity:qty,detail:`${serviceLabel}, ${l.dtfW}×${l.dtfH} in, ${sourceLabel}${minimumApplied?' • $'+money(minimum)+' minimum applied':''}`,unitPrice,calculatedUnitPrice:calculatedUnit,lineTotal,pricing:{service,source,rawItemCost,itemCostMultiplier,markedItemCost,rawTransferCost,markedTransferCost,application,pressOverhead,printerDepreciation,process,pressEnergy,printerEnergy,energy,laborMinutes,labor,preOverall,overallMarkupPercent,overallMarkupMultiplier,dtfMinimum:minimum,minimumApplied},inputs:{...l,dtfService:service,dtfSource:source}};
 };
