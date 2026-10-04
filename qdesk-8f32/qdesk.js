@@ -27,7 +27,30 @@ function newQuote(){clearQuoteEditor();custName.value=custEmail.value=custPhone.
 function loadQuoteForEdit(q){currentQuote=q;editingQuoteId=q.id;editingRevision=q.revision||1;custName.value=q.customer?.name||'';custEmail.value=q.customer?.email||'';custPhone.value=q.customer?.phone||'';custAddress.value=q.customer?.address||'';quoteNotes.value=q.notes||'';bulkDiscountPct.value=q.bulkDiscount?.percent||0;priceAdjustment.value=q.adjustment?.amount||0;adjustmentReason.value=q.adjustment?.reason||'';includeTax.checked=Number(q.pricing?.tax)>0;if(Array.isArray(q.lines)&&q.lines.length){lines=q.lines.map(l=>({...blankLine(),...(l.inputs||{}),type:l.type||'dtf',quantity:l.quantity||1,unitPriceOverride:(l.inputs?.unitPriceOverride??l.unitPrice??'')}))}else{lines=[blankLine()]}renderQuoteLines();editBanner.classList.add('show');editBannerText.textContent=`Editing ${q.id} • Rev ${q.revision||1}`;saveQuoteBtn.textContent='Recalculate & Save Revision';window.scrollTo({top:0,behavior:'smooth'})}
 async function loadQuotes(){try{const d=await api(API_QUOTES);window.recentQuoteData=d.quotes||[];recentQuotes.innerHTML=d.quotes.length?'':'<p>No saved quotes yet.</p>';d.quotes.slice(0,20).forEach((q,i)=>recentQuotes.insertAdjacentHTML('beforeend',`<div class="recent-row"><div class="recent-main"><strong>${esc(q.id)}</strong> • Rev ${q.revision||1}<br>${esc(q.customer?.name||'Customer')} • ${(q.lines||[]).length||1} item(s) • $${money(q.pricing?.total)} <span class="small">${new Date(q.updatedAt||q.createdAt).toLocaleString()}</span></div><button class="blue" onclick="editRecent(${i})">Edit Quote</button></div>`))}catch{recentQuotes.innerHTML='<p>Could not load saved quotes.</p>'}}
 function editRecent(i){const q=window.recentQuoteData?.[i];if(q)loadQuoteForEdit(q)}function editCurrent(){if(currentQuote)loadQuoteForEdit(currentQuote)}
-function savePDF(){if(!currentQuote)return;html2pdf().set({margin:.35,filename:`${currentQuote.id}-rev${currentQuote.revision||1}.pdf`,html2canvas:{scale:2},jsPDF:{unit:'in',format:'letter'}}).from(document.getElementById('pdf-content')).save()}
+async function savePDF(){
+  if(!currentQuote)return;
+  const source=document.getElementById('pdf-content');
+  if(!source)return alert('Quote preview is not available.');
+  const clone=source.cloneNode(true);
+  clone.removeAttribute('id');
+  Object.assign(clone.style,{display:'block',visibility:'visible',position:'fixed',left:'-10000px',top:'0',width:'7.8in',maxWidth:'none',background:'#fff',color:'#111',zIndex:'-1'});
+  document.body.appendChild(clone);
+  try{
+    await Promise.all([...clone.querySelectorAll('img')].map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=img.onerror=resolve})));
+    await html2pdf().set({
+      margin:.35,
+      filename:`${currentQuote.id}-rev${currentQuote.revision||1}.pdf`,
+      pagebreak:{mode:['css','legacy']},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false},
+      jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
+    }).from(clone).save();
+  }catch(e){
+    console.error('PDF export failed',e);
+    alert('PDF could not be created. Please try again.');
+  }finally{
+    clone.remove();
+  }
+}
 function summary(){if(!currentQuote)return'';let t=`4Zero2 Creations Quote ${currentQuote.id} Rev ${currentQuote.revision||1}\nCustomer: ${currentQuote.customer?.name||''}\n`;currentQuote.lines?.forEach(l=>t+=`${l.quantity} × ${l.item} @ $${money(l.unitPrice)} = $${money(l.lineTotal)}\n`);t+=`Subtotal: $${money(currentQuote.pricing?.subtotal)}\nBulk discount: ${currentQuote.bulkDiscount?.percent||0}% (-$${money(currentQuote.bulkDiscount?.amount)})\nAdjustment: ${currentQuote.adjustment?.amount||0} ${currentQuote.adjustment?.reason||''}\nTax: $${money(currentQuote.pricing?.tax)}\nTotal: $${money(currentQuote.pricing?.total)}`;return t}
 function sendWebmail(){if(!currentQuote)return;window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(currentQuote.customer?.email||'')}&su=${encodeURIComponent('4Zero2 Creations Quote '+currentQuote.id)}&body=${encodeURIComponent(summary())}`,'_blank')}async function copyQuote(){try{await navigator.clipboard.writeText(summary());alert('Quote copied.')}catch{prompt('Copy:',summary())}}
 function switchPane(id,b){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.pane').forEach(x=>x.classList.remove('active'));document.getElementById('pane-'+id).classList.add('active')}
